@@ -42,9 +42,11 @@ def make_request():
             r = requests.get(url,timeout=10)
 
             if r.status_code != 200:
-                print(f"Error: Unable to retrieve data for {month_str}. Status code: {r.status_code}")
+                print(f"Error: Unable to retrieve data for {month_str}. "
+                f"Status code: {r.status_code}")
             elif 'rate limit' in r.text: #if rate limit has been reached
-                print(f"Error: Unable to retrieve data for {month_str}. Daily Rate limit was reached.")
+                print(f"Error: Unable to retrieve data for {month_str}. "
+                f"Daily Rate limit was reached.")
             else:
                 # Define the path to save the file on the desktop
 
