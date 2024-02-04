@@ -37,7 +37,11 @@ def make_request():
         # Send the API request
         r = requests.get(url,timeout=10)
 
-        if r.status_code == 200:
+        if r.status_code != 200:
+            print(f"Error: Unable to retrieve data for {month_str}. Status code: {r.status_code}")
+        elif 'rate limit' in r.text: #if rate limit has been reached
+            print(f"Error: Unable to retrieve data for {month_str}. Daily Rate limit was reached.")
+        else:
             # Define the path to save the file on the desktop
             desktop_path = os.path.expanduser("~/Desktop/Stockdata")
             file_path = os.path.join(desktop_path, f"alphavantage_data_{month_str}.csv")
@@ -53,8 +57,6 @@ def make_request():
             if calls_per_key >= 25:
                 api_key_index = (api_key_index + 1) % len(API_KEYS)
                 calls_per_key = 0
-        else:
-            print(f"Error: Unable to retrieve data for {month_str}. Status code: {r.status_code}")
 
         # Move to the previous month
         start_month = start_month + timedelta(days=30)
