@@ -25,38 +25,40 @@ def make_request():
     while start_month <= end_month:
         # Format the date in YYYY-MM format
         month_str = start_month.strftime('%Y-%m')
-
-        # Build the URL for the API request
-        url = (f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY"
-        f"&symbol={SYMBOL}"
-        f"&interval={INTERVAL}"
-        f"&apikey={API_KEYS[api_key_index]}"
-        f"&outputsize=full"
-        f"&datatype=csv&month={month_str}")
-
-        # Send the API request
-        r = requests.get(url,timeout=10)
-
-        if r.status_code != 200:
-            print(f"Error: Unable to retrieve data for {month_str}. Status code: {r.status_code}")
-        elif 'rate limit' in r.text: #if rate limit has been reached
-            print(f"Error: Unable to retrieve data for {month_str}. Daily Rate limit was reached.")
+        desktop_path = os.path.expanduser("~/Desktop/Stockdata")
+        file_path = os.path.join(desktop_path, f"alphavantage_data_{month_str}.csv")
+        if os.path.exists(file_path):
+            print(f"Data for {month_str} already saved.")
         else:
-            # Define the path to save the file on the desktop
-            desktop_path = os.path.expanduser("~/Desktop/Stockdata")
-            file_path = os.path.join(desktop_path, f"alphavantage_data_{month_str}.csv")
+            # Build the URL for the API request
+            url = (f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY"
+            f"&symbol={SYMBOL}"
+            f"&interval={INTERVAL}"
+            f"&apikey={API_KEYS[api_key_index]}"
+            f"&outputsize=full"
+            f"&datatype=csv&month={month_str}")
 
-            # Save the data to a file on the desktop
-            with open(file_path, 'wb') as file:
-                file.write(r.content)
+            # Send the API request
+            r = requests.get(url,timeout=10)
 
-            print(f"Data for {month_str} saved to {file_path}")
+            if r.status_code != 200:
+                print(f"Error: Unable to retrieve data for {month_str}. Status code: {r.status_code}")
+            elif 'rate limit' in r.text: #if rate limit has been reached
+                print(f"Error: Unable to retrieve data for {month_str}. Daily Rate limit was reached.")
+            else:
+                # Define the path to save the file on the desktop
 
-            # Increment the API key index and reset the calls counter if necessary
-            calls_per_key += 1
-            if calls_per_key >= 25:
-                api_key_index = (api_key_index + 1) % len(API_KEYS)
-                calls_per_key = 0
+                # Save the data to a file on the desktop
+                with open(file_path, 'wb') as file:
+                    file.write(r.content)
+
+                print(f"Data for {month_str} saved to {file_path}")
+
+                # Increment the API key index and reset the calls counter if necessary
+                calls_per_key += 1
+                if calls_per_key >= 25:
+                    api_key_index = (api_key_index + 1) % len(API_KEYS)
+                    calls_per_key = 0
 
         # Move to the previous month
         start_month = start_month + timedelta(days=30)
