@@ -2,47 +2,43 @@ import requests
 import os
 from datetime import datetime, timedelta
 
-# Replace these API keys with your own keys from https://www.alphavantage.co/support/#api-key
-api_keys = ['YYLUN0RB2ER81GFR', 'U2AIMRQSAH58QCP2', '0IJGQ4OJUTZC7W6A', 'N2RS2KZ08K54CEQH', 'H19BQEDTB2YTBP3O']
+# Function to generate month range
+def month_range(start_date, end_date):
+    start_month = datetime.strptime(start_date, '%Y-%m')
+    end_month = datetime.strptime(end_date, '%Y-%m')
+    while start_month <= end_month:
+        yield start_month.strftime('%Y-%m')
+        start_month += timedelta(days=32)  # Move to the next month
+        start_month = start_month.replace(day=1)
+
+# API Key and Parameters
+api_key = 'ZN1R72QNLMVWF7NQ'
 symbol = 'GME'
 interval = '5min'
+start_month = '2020-01'  # Example start month
+end_month = '2022-01'  # Example end month
 
-# Calculate the start and end months for the past 60 months
-end_month = datetime.now()
-start_month = end_month - timedelta(days=60 * 30)  # 30 days per month approximation
+# Define the path to save the files
+desktop_path = os.path.expanduser("~/Desktop/Stockdata")
+os.makedirs(desktop_path, exist_ok=True)  # Ensure the directory exists
 
-# Initialize counters for API keys and calls
-api_key_index = 0
-calls_per_key = 0
-
-while start_month <= end_month:
-    # Format the date in YYYY-MM format
-    month_str = start_month.strftime('%Y-%m')
-    
-    # Build the URL for the API request
-    url = f'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval={interval}&apikey={api_keys[api_key_index]}&outputsize=full&datatype=csv&month={month_str}'
+# Iterate through each month in the range
+for month in month_range(start_month, end_month):
+    # Update URL with the current month
+    url = f'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval={interval}&apikey={api_key}&outputsize=full&datatype=csv&month={month}'
     
     # Send the API request
     r = requests.get(url)
     
     if r.status_code == 200:
-        # Define the path to save the file on the desktop
-        desktop_path = os.path.expanduser("~/Desktop/Stockdata")
-        file_path = os.path.join(desktop_path, f"alphavantage_data_{month_str}.csv")
-
-        # Save the data to a file on the desktop
+        file_path = os.path.join(desktop_path, f"alphavantage_data_{symbol}_{month}.csv")
+        
+        # Save the data to a file
         with open(file_path, 'wb') as file:
             file.write(r.content)
-
-        print(f"Data for {month_str} saved to {file_path}")
-
-        # Increment the API key index and reset the calls counter if necessary
-        calls_per_key += 1
-        if calls_per_key >= 25:
-            api_key_index = (api_key_index + 1) % len(api_keys)
-            calls_per_key = 0
+        
+        print(f"Data for {month} saved to {file_path}")
     else:
-        print(f"Error: Unable to retrieve data for {month_str}. Status code: {r.status_code}")
+        print(f"Error: Unable to retrieve data for {month}. Status code: {r.status_code}")
 
-    # Move to the previous month
-    start_month = start_month + timedelta(days=30)
+print("Data fetching complete.")
