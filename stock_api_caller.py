@@ -26,7 +26,7 @@ def make_request():
         # Format the date in YYYY-MM format
         month_str = start_month.strftime('%Y-%m')
         desktop_path = os.path.expanduser("~/Desktop/Stockdata")
-        file_path = os.path.join(desktop_path, f"alphavantage_data_{month_str}.csv")
+        file_path = os.path.join(desktop_path, f"alphavantage_data_{SYMBOL}_{month_str}.csv")
         if os.path.exists(file_path):
             print(f"Data for {month_str} already saved.")
         else:
