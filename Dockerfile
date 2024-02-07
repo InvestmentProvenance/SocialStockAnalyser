@@ -17,5 +17,6 @@ ENV DB_HOST "investdata.c5cwsai4kiot.us-east-1.rds.amazonaws.com"
 ENV DB_USER "admin"
 ENV DB_PASSWORD "12345678"
 ENV DB_NAME "your_database_name"
+ENV TESTING = True
 # This wont run when you launch a dev conatiner but will run when sent to AWS - so is how we start our applicaiton
 CMD python3 main.py
