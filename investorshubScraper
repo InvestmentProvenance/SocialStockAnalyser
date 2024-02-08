@@ -33,13 +33,17 @@ def investorsHubScraper(url):
                 else:
                     reply_number = replies[0:replies.index(" ")]
 
+                emojis = comment.find_all("span", {"data-app": "emoji-count"})
+                ecount = 0
+                for e in emojis:
+                    ecount = ecount + int(e.get_text().strip())
 
                 text = text.get_text()
                 # break into lines and remove leading and trailing space on each
                 lines = (line.strip() for line in text.splitlines())
                 # break multi-headlines into a line each
                 chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-                comment_info.append([time,user,text,reply_number])
+                comment_info.append([time,user,text,reply_number,ecount])
 
 
 
