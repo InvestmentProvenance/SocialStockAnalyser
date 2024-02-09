@@ -1,6 +1,7 @@
+"""An example to scrape data from Reddit."""
 import praw
-import pandas as pd
-from praw.models import MoreComments
+#import pandas as pd
+#from praw.models import MoreComments
 
 reddit = praw.Reddit(
     client_id="wsewHa7zHhUasFHQYlEDSw",
