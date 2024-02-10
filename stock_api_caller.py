@@ -11,7 +11,10 @@ API_KEY = 'YYLUN0RB2ER81GFR'
 SYMBOL = 'GME'
 
 def get_stock_data(symbol : str, month_str: str) -> bytes:
-    """Makes a Request to AlphaVantage API"""
+    """Makes a Request to AlphaVantage API.
+ 
+    :raises ValueError: if rate limit reached or if the response status isn't 200.
+    """
     interval = '5min'
     url = (f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY"
             f"&symbol={symbol}"
@@ -24,11 +27,10 @@ def get_stock_data(symbol : str, month_str: str) -> bytes:
     if r.status_code != 200:
         raise RuntimeError(f"Error: Unable to retrieve data for {month_str}. "
         f"Status code: {r.status_code}")
-    elif 'rate limit' in r.text: #if rate limit has been reached
+    if 'rate limit' in r.text: #if rate limit has been reached
         raise RuntimeError(f"Error: Unable to retrieve data for {month_str}. "
         f"Daily Rate limit was reached.")
-    else:
-        return r.content
+    return r.content
 
 def save_to_file(file_path : str, data : bytes) -> None:
     """Save data to a file on the desktop"""
@@ -56,9 +58,13 @@ def download_symbol_data(symbol : str, end_month:datetime =datetime.now() ,
         if os.path.exists(file_path):
             print(f"Data for {month_str} already saved.")
         else:
-            data = get_stock_data(symbol, month_str)
-            save_to_file(file_path, data)
-            print(f"Data for {month_str} saved to {file_path}")
+            try:
+                data = get_stock_data(symbol, month_str)
+            except RuntimeError as e:
+                print(e)
+            else: #if no exceptions occur
+                save_to_file(file_path, data)
+                print(f"Data for {month_str} saved to {file_path}")
         # Move to the next month
         start_month = start_month + timedelta(days=30)
         # Increment the API key index and reset the calls counter if necessary
@@ -67,4 +73,4 @@ def download_symbol_data(symbol : str, end_month:datetime =datetime.now() ,
         #     api_key_index = (api_key_index + 1) % len(API_KEYS)
         #     calls_per_key = 0
 
-#download_symbol_data("SPCE")
+download_symbol_data("SPCE")
