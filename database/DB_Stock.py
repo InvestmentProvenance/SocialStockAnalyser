@@ -4,6 +4,7 @@ import os
 import re
 import glob
 
+
 #db = pymysql.connect(host = 'investdata.c5cwsai4kiot.us-east-1.rds.amazonaws.com',user = 'admin',password ='12345678')
 
 host = os.environ['DB_HOST']
@@ -30,18 +31,27 @@ def DB_Operation(func):
                 print("Connection closed")
         return None
         
-
     return wrap 
 
+@DB_Operation
+def upload_Stock(database:pymysql.connect, raw_data):
+    cursor = database.cursor()
+    insert_sql = """
+    INSERT INTO stock_data (timestamp, open, high, low, close, volume, symbol)
+    VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """
+    cursor.executemany(insert_sql, raw_data)
+    database.commit()
+    pass
 
 @DB_Operation
-def read_Stock(database:pymysql.connect, ticker:str,start_date:datetime,end_date:datetime):   #retrieves last 30 days
+def read_Stock(database:pymysql.connect, ticker:str,start_date:datetime,end_date:datetime):   #retrieves last 30 days chronologically ordered
     print("reading")
     start_date = end_date - timedelta(days=30)  # 30 days per month approximation
     cursor = database.cursor()
 
     # Define the SQL query to select all data from the table
-    select_query = "SELECT * FROM stock_data WHERE TimeStamp BETWEEN '{}' AND '{}' AND Symbol = '{}'".format(start_date,end_date,ticker)
+    select_query = "SELECT * FROM stock_data WHERE TimeStamp BETWEEN '{}' AND '{}' AND Symbol = '{}' ORDER BY TimeStamp".format(start_date,end_date,ticker)
 
     print(select_query)
 
