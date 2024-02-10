@@ -22,8 +22,7 @@ def db_operation(func: Callable[..., pymysql.connect ]):
         try:
             db = pymysql.connect(host=host, user=user, password=password, database=database_name)
             print("trying operation")
-            kwargs['database'] = db
-            return func(*args, **kwargs)
+            return func(database = db, *args, **kwargs)
         except pymysql.Error as e:
             print(f"Error: {e}")
         finally:
@@ -34,7 +33,8 @@ def db_operation(func: Callable[..., pymysql.connect ]):
     return wrap
 
 @db_operation
-def upload_stock(database:pymysql.connect, raw_data):
+def upload_stock(raw_data,
+                 database:pymysql.connect = None):
     """Uploads stock data to the database. raw_data is a collection of tuples"""
     cursor = database.cursor()
     insert_sql = """
@@ -46,10 +46,10 @@ def upload_stock(database:pymysql.connect, raw_data):
 
 @db_operation
 def read_stock(
-    database:pymysql.connect,
     ticker:str,
     start_date:datetime,
-    end_date:datetime):   #retrieves last 30 days chronologically ordered
+    end_date:datetime,
+    database:pymysql.connect = None):   #retrieves last 30 days chronologically ordered
     """Retrives the stock data for the given ticker from the database"""
     print("reading")
     start_date = end_date - timedelta(days=30)  # 30 days per month approximation
@@ -68,3 +68,8 @@ def read_stock(
 
     # Display the table data
     return table_data
+if __name__ == '__main__':
+    print(read_stock(
+        ticker = "GME",
+        start_date = datetime(2021, 1, 1),
+        end_date = datetime(2021, 1, 30)))
