@@ -75,4 +75,4 @@ def download_symbol_data(symbol : str, end_month:datetime =datetime.now() ,
         #     api_key_index = (api_key_index + 1) % len(API_KEYS)
         #     calls_per_key = 0
 
-download_symbol_data("SPCE")
+# download_symbol_data("SPCE")
