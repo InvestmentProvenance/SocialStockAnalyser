@@ -11,7 +11,7 @@ import requests
 API_KEY = 'YYLUN0RB2ER81GFR'
 SYMBOL = 'GME'
 
-def getStockData(symbol, month_str):
+def get_stock_data(symbol, month_str):
     """Makes a Request to AlphaVantage API"""
     interval = '5min'
     url = (f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY"
@@ -30,19 +30,22 @@ def getStockData(symbol, month_str):
         f"Daily Rate limit was reached.")
     else:
         return r.content
-    
-def saveToFile(file_path, data):
-    # Save the data to a file on the desktop
+
+def save_to_file(file_path, data):
+    """Save data to a file on the desktop"""
     with open(file_path, 'wb') as file:
         file.write(data)
 
+def download_symbol_data(symbol, end_month=datetime.now(), start_month=None):
+    """
+    Downloads data for the givne ticker symbol from the start month to the end month.
+    By default, the end_month is set to today and the start month is set to 60 months ago.
+    """
+    month_num = 60
+    days_in_month = 30
+    if start_month is None: 
+        start_month = end_month - timedelta(days=month_num * days_in_month)
 
-def downloadSymbolData(symbol, end_month=datetime.now(), start_month=None):
-    MONTH_NUM = 60
-    DAYS_IN_MONTH = 30
-    if start_month == None: 
-        start_month = end_month - timedelta(days=MONTH_NUM * DAYS_IN_MONTH)
-    
     # Initialize counters for API keys and calls
     # api_key_index = 0
     # calls_per_key = 0
@@ -53,10 +56,10 @@ def downloadSymbolData(symbol, end_month=datetime.now(), start_month=None):
         if os.path.exists(file_path):
             print(f"Data for {month_str} already saved.")
         else:
-            data = getStockData(symbol, month_str)
-            saveToFile(file_path, data)
+            data = get_stock_data(symbol, month_str)
+            save_to_file(file_path, data)
             print(f"Data for {month_str} saved to {file_path}")
-        # Move to the previous month
+        # Move to the next month
         start_month = start_month + timedelta(days=30)
         # Increment the API key index and reset the calls counter if necessary
         # calls_per_key += 1
@@ -64,4 +67,4 @@ def downloadSymbolData(symbol, end_month=datetime.now(), start_month=None):
         #     api_key_index = (api_key_index + 1) % len(API_KEYS)
         #     calls_per_key = 0
 
-downloadSymbolData("SPCE")
+#download_symbol_data("SPCE")
