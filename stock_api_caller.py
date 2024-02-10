@@ -2,7 +2,6 @@
 import os
 from datetime import datetime, timedelta
 import requests
-# import typing
 
 
 # Replace these API keys with your own keys from https://www.alphavantage.co/support/#api-key
@@ -11,7 +10,7 @@ import requests
 API_KEY = 'YYLUN0RB2ER81GFR'
 SYMBOL = 'GME'
 
-def get_stock_data(symbol, month_str):
+def get_stock_data(symbol : str, month_str: str) -> bytes:
     """Makes a Request to AlphaVantage API"""
     interval = '5min'
     url = (f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY"
@@ -31,12 +30,13 @@ def get_stock_data(symbol, month_str):
     else:
         return r.content
 
-def save_to_file(file_path, data):
+def save_to_file(file_path : str, data : bytes) -> None:
     """Save data to a file on the desktop"""
     with open(file_path, 'wb') as file:
         file.write(data)
 
-def download_symbol_data(symbol, end_month=datetime.now(), start_month=None):
+def download_symbol_data(symbol : str, end_month:datetime =datetime.now() ,
+                         start_month:datetime =None) -> None:
     """
     Downloads data for the givne ticker symbol from the start month to the end month.
     By default, the end_month is set to today and the start month is set to 60 months ago.
