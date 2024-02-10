@@ -1,3 +1,4 @@
+"""Module to make requests to the AlphaVantage API and save the data to a file"""
 import os
 from datetime import datetime, timedelta
 import requests
@@ -19,7 +20,7 @@ def make_request(start_month:datetime,end_month:datetime):
     calls_per_key = 0
 
     current_month = datetime(start_month)
-    
+
     while current_month <= end_month:
         month_str = start_month.strftime('%Y-%m')
         url = (f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY"
