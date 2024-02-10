@@ -1,8 +1,8 @@
 """Makes requests to AlphaVantage"""
 import os
 from datetime import datetime, timedelta
-import requests
 import logging
+import requests
 
 logging.basicConfig(level=logging.DEBUG)
 
