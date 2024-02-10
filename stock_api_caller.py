@@ -55,7 +55,7 @@ def downloadSymbolData(symbol, end_month=datetime.now(), start_month=None):
         else:
             data = getStockData(symbol, month_str)
             saveToFile(file_path, data)
-            print(f"Data for {start_month} saved to {file_path}")
+            print(f"Data for {month_str} saved to {file_path}")
         # Move to the previous month
         start_month = start_month + timedelta(days=30)
         # Increment the API key index and reset the calls counter if necessary
