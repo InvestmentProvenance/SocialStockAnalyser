@@ -47,7 +47,7 @@ def download_symbol_data(symbol : str, end_month:datetime =datetime.now() ,
     """
     month_num = 60
     days_in_month = 30
-    if start_month is None: 
+    if start_month is None:
         start_month = end_month - timedelta(days=month_num * days_in_month)
 
     # Initialize counters for API keys and calls
