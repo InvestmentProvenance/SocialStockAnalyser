@@ -2,7 +2,9 @@
 import os
 from datetime import datetime, timedelta
 import requests
+import logging
 
+logging.basicConfig(level=logging.DEBUG)
 
 # Replace these API keys with your own keys from https://www.alphavantage.co/support/#api-key
 # API_KEYS = ['YYLUN0RB2ER81GFR', 'U2AIMRQSAH58QCP2', '0IJGQ4OJUTZC7W6A', 'N2RS2KZ08K54CEQH',
@@ -56,15 +58,15 @@ def download_symbol_data(symbol : str, end_month:datetime =datetime.now() ,
         desktop_path = os.path.expanduser("~")
         file_path = os.path.join(desktop_path, f"alphavantage_data_{symbol}_{month_str}.csv")
         if os.path.exists(file_path):
-            print(f"Data for {month_str} already saved.")
+            logging.info("Data for %s already saved.", month_str)
         else:
             try:
                 data = get_stock_data(symbol, month_str)
             except RuntimeError as e:
-                print(e)
+                logging.info(e)
             else: #if no exceptions occur
                 save_to_file(file_path, data)
-                print(f"Data for {month_str} saved to {file_path}")
+                logging.debug("Data for %s saved to %s", month_str, file_path)
         # Move to the next month
         start_month = start_month + timedelta(days=30)
         # Increment the API key index and reset the calls counter if necessary
