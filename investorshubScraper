@@ -1,6 +1,7 @@
 
 import requests
 from bs4 import BeautifulSoup
+from database import DB_Stock
 
 def investorsHubScraper(url):
 
@@ -11,6 +12,7 @@ def investorsHubScraper(url):
 
     #n = 0
     counter = -1# at the end of board you reach a ssection that is just 0 to 1 comments a page
+    comment_info = []
 
     while url != None and counter != 0 and counter != 1:
         counter = 0
@@ -20,7 +22,6 @@ def investorsHubScraper(url):
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, 'html.parser')
             comments = soup.find_all("div", {"class": "card full-message-card my-4 mt-md-0 mb-md-2 rounded-0 border-left-0 border-right-0 border-top-0"})
-            comment_info = []
             
             for comment in comments:
                 counter += 1
@@ -43,21 +44,7 @@ def investorsHubScraper(url):
                 lines = (line.strip() for line in text.splitlines())
                 # break multi-headlines into a line each
                 chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-                comment_info.append([time,user,text,reply_number,ecount])
-
-
-
-            """ 
-            #for testing. need to write to database
-            f = open("scrapedcomments"+str(n)+".txt", "w", encoding="utf-8")
-            for i in comment_info:
-                f.write(i[0]+"\n")
-                f.write(i[1]+"\n")
-                f.write(i[2]+"\n")
-                f.write(str(i[3])+"\n\n")
-            
-            f.close()
-            """
+                comment_info.append([user,time,text,reply_number*2 + ecount])
 
 
         buttons = soup.find_all("a", {"class":"mt-1 mr-2 btn blue-style-btn text-decoration-none"})
@@ -67,4 +54,5 @@ def investorsHubScraper(url):
                 url = b.get("href")
                 break
 
-        #n = n +1
+    DB_Stock.upload_sns(raw_data = comment_info, site = "investorshub", symbol = "gme")
+    print(":)")
