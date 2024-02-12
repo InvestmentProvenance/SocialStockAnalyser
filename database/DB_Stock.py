@@ -42,7 +42,17 @@ def upload_Stock(database:pymysql.connect, raw_data):
     """
     cursor.executemany(insert_sql, raw_data)
     database.commit()
-    pass
+
+@DB_Operation
+def upload_sns(database:pymysql.connect, raw_data, site, symbol):
+    cursor = database.cursor()
+    insert_sql = f"""
+    INSERT INTO sns_comments (username, timestamp, body, score, {site}, {symbol})
+    VALUES (%s, %s, %s, %s, %s, %s)
+    """
+    cursor.executemany(insert_sql, raw_data)
+    database.commit()
+
 
 @DB_Operation
 def read_Stock(database:pymysql.connect, ticker:str,start_date:datetime,end_date:datetime):   #retrieves last 30 days chronologically ordered
