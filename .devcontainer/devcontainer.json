@@ -11,7 +11,8 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"ms-python.pylint"
+				"ms-python.pylint",
+				"ms-azuretools.vscode-docker"
 			]
 		}
 	}
