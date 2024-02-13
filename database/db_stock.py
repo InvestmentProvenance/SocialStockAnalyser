@@ -70,7 +70,7 @@ def read_stock(
     return table_data
 
 @db_operation
-def upload_sns(database:pymysql.connect, raw_data):
+def upload_sns(raw_data, database:pymysql.connect = None):
     """Uploadssns data to databse - TODO: how to format the data?"""
     cursor = database.cursor()
     insert_sql = """

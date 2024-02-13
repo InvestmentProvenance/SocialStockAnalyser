@@ -18,7 +18,7 @@ def investors_hub_scraper(url):
     while url is not None and counter != 0 and counter != 1:
         counter = 0
 
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=30)
         # Check if the request was successful (status code 200
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, 'html.parser')
