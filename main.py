@@ -10,7 +10,7 @@ start_date = end_date - timedelta(days=30)  # 30 days per month approximation
 
 test_data = [["user", datetime.datetime(2021,1,1), "comments", 10, "reddit.com", "TEST"], ["user2", datetime.datetime(2022, 1, 2), "comments2", 1, "Googledocs.com", "TEST"]]
 
-db_stock.upload_sns(raw_data = test_data, site="reddit.com",symbol= "TEST")
+db_stock.upload_sns(raw_data = test_data)
 
 print("start date: ", start_date)
 print("end date: ", end_date)

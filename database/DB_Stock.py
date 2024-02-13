@@ -44,7 +44,7 @@ def upload_Stock(database:pymysql.connect, raw_data):
     database.commit()
 
 @DB_Operation
-def upload_sns(database:pymysql.connect, raw_data, site, symbol):
+def upload_sns(database:pymysql.connect, raw_data):
     cursor = database.cursor()
     insert_sql = """
     INSERT INTO sns_comments (username, timestamp, body, score, site, symbol)
