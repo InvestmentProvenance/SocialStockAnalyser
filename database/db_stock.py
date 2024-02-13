@@ -68,6 +68,18 @@ def read_stock(
 
     # Display the table data
     return table_data
+
+@db_operation
+def upload_sns(database:pymysql.connect, raw_data):
+    """Uploadssns data to databse - TODO: how to format the data?"""
+    cursor = database.cursor()
+    insert_sql = """
+    INSERT INTO sns_comments (username, timestamp, body, score, site, symbol)
+    VALUES (%s, %s, %s, %s, %s, %s)
+    """
+    cursor.executemany(insert_sql, raw_data)
+    database.commit()
+
 if __name__ == '__main__':
     print(read_stock(
         ticker = "GME",
