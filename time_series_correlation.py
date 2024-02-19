@@ -6,6 +6,7 @@ from datetime import datetime
 import matplotlib.pyplot as plt 
 from alive_progress import alive_bar
 
+
 def time_series_compare(compare_func, 
                          series_1_timestamps, series_1_values,
                         series_2_timestamps, series_2_values, 
@@ -45,8 +46,8 @@ def correlation(stock_timestamps : np.array, stock_price : np.array, sns_timesta
                 totalweight += weight
                 count += 1
 
-        correpsonding_sentiment[index] = total/count
-        return np.correlate(stock_price, correpsonding_sentiment)
+        correpsonding_sentiment[index] = total/weight
+    return np.correlate(stock_price, correpsonding_sentiment)
     
 
 #For testing - delete later
@@ -67,10 +68,13 @@ def get_market_sentiment():
 if __name__ == "__main__":
     
     sns_data = get_market_sentiment()
-    stock_data = data.get_data("GME", datetime(2021, 1, 1), datetime(2021, 9, 1))
+    sns_data['timestamp'] = pd.to_datetime(sns_data['datetime']) # TZ aware
+    lower_ts = min(sns_data['timestamp'])
+    upper_ts = max(sns_data['timestamp'])
+    stock_data = data.get_data("GME", lower_ts, upper_ts)
 
     
-    sns_data['timestamp'] = pd.to_datetime(sns_data['datetime']) # TZ aware
+    
     stock_data['timestamp'] = pd.to_datetime(stock_data['timestamp'], utc = True) # Not TZ aware, I guess I'm assuming UTC
     sns_timestamps =np.flip( sns_data['timestamp'])
     sns_sentiment = np.flip( sns_data['sentiment'])
@@ -78,7 +82,7 @@ if __name__ == "__main__":
     print("Initial Correlation:")
     print(correlation(stock_data['timestamp'], stock_data['close'], sns_timestamps, sns_sentiment))
 
-    time_diffs_seconds = list(range(-500, 500))
+    time_diffs_seconds = list(range(-4000, 4000, 20))
     time_diffs = [pd.Timedelta(seconds=i) for i in time_diffs_seconds]
     print("Rolling Correlations:")
     rolling_correlations = time_series_compare(correlation,  
@@ -89,6 +93,6 @@ if __name__ == "__main__":
                               time_diffs)
     print(rolling_correlations)
     plt.plot(time_diffs_seconds, rolling_correlations)
-    plt.show()  
+    plt.show()
     plt.savefig("correlation.png")
     
