@@ -1,7 +1,7 @@
 """Provides functionality to download and upload pandas dataframes from the DB"""
 import datetime
 import pandas as pd
-import db_stock
+from database import db_stock
 
 def get_data(ticker:str, start_time:datetime, end_time:datetime) -> pd.DataFrame :
     """Retrieves the stock data for the given ticker from the database
