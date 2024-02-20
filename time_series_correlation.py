@@ -5,7 +5,12 @@ import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt 
 import tqdm
+import multiprocessing
+from functools import partial
 
+def __run_individual_correlation(compare_func, series1 : pd.Series, series2 : pd.Series, time_diff : pd.Timedelta):
+    """Runs compare function once - used for multiprocessing"""
+    return compare_func(series1, series2)
 
 def time_series_compare(compare_func,
                          series1 : pd.Series,
@@ -15,31 +20,25 @@ def time_series_compare(compare_func,
     #Maybe will work with other time types not tested yet
     series1.sort_index(inplace=True)
     series2.sort_index(inplace=True)
-    results = np.zeros(len(time_differences))
-    for i, time_diff in enumerate(time_differences):
-        shifted_series_2 = series2.copy()
-        shifted_series_2.index = shifted_series_2.index + time_diff
+    partial_individual_correlation = partial(__run_individual_correlation, compare_func, series1, series2)
+    with multiprocessing.Pool() as pool:
+        results = list(tqdm.tqdm(
+        pool.imap(partial_individual_correlation, time_differences)
+        , total=len(time_differences), desc="Calculating Correlation at Different Offsets"))
+    #results = list(map(partial_individual_correlation, time_differences))
 
-        results[i] = compare_func(
-            series1,
-            shifted_series_2)
+    return np.array(results)
 
-    return results
 
 def correlation(stock_series: pd.Series, sns_series : pd.Series) -> float :
-    """Calculates correlation between stock price and sentiment - Uses stock closing price"""
+    """Calculates correlation between stock price and sentiment - Uses stock closing priceb
+    Series must have timestamps in ascending order"""
     
-    #assert all(stock_timestamps[i] <= stock_timestamps[i+1] for i in range(len(stock_timestamps)-1)), "Must be sorted"
-    #assert all(sns_timestamps[i] <= sns_timestamps[i+1] for i in range(len(sns_timestamps)-1)), "Must be sorted"
-
     corresponding_sentiment = [None] * (len(stock_series)-1)
     #fill coreresponding sentiment with weighted average of nearest sns sentiments
     for i, stock_timestamp in enumerate(stock_series.index):
         if i == len(stock_series)-1:
             continue
-        #TODO: This is inefficent but the better way seems to not work - perhaps to do with types of datetime
-        #mask = sns_series.index.to_series().between(stock_timestamp, stock_series.index[i+1])
-        #relevantsentiments = sns_series[mask]
         relevantsentiments = sns_series[pd.to_datetime(stock_timestamp):pd.to_datetime(stock_series.index[i+1])]
         if (len(relevantsentiments) != 0):
             corresponding_sentiment[i] = np.mean(relevantsentiments)
@@ -59,7 +58,7 @@ def correlation(stock_series: pd.Series, sns_series : pd.Series) -> float :
             cleaned_sentiments[count] = corresponding_sentiment[idx]
             stock_prices[count] = stock_series.iloc[idx]
             count+=1
-
+    #TODO: use a different formula for correlation
     return np.correlate(stock_prices, cleaned_sentiments)
 
 
@@ -79,7 +78,7 @@ def get_market_sentiment():
 
 #Example usage
 if __name__ == "__main__":
-    time_diffs_seconds = list(range(-40, 40, 20))
+    time_diffs_seconds = list(range(-4000, 4000, 20))
     time_diffs = [pd.Timedelta(seconds=i) for i in time_diffs_seconds]
 
     sns_data = get_market_sentiment()
