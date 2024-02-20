@@ -10,7 +10,9 @@ from functools import partial
 
 def __run_individual_correlation(compare_func, series1 : pd.Series, series2 : pd.Series, time_diff : pd.Timedelta):
     """Runs compare function once - used for multiprocessing"""
-    return compare_func(series1, series2)
+    s2 = series2.copy()
+    s2.index = s2.index + time_diff
+    return compare_func(series1, s2)
 
 def time_series_compare(compare_func,
                          series1 : pd.Series,
