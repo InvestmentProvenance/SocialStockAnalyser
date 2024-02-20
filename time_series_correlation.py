@@ -13,10 +13,13 @@ def time_series_compare(compare_func,
                         time_differences):
     """Compares two time series using the given function and returns the result as a np array"""
     #Maybe will work with other time types not tested yet
+    series1.sort_index(inplace=True)
+    series2.sort_index(inplace=True)
     results = np.zeros(len(time_differences))
     for i, time_diff in enumerate(time_differences):
         shifted_series_2 = series2.copy()
         shifted_series_2.index = shifted_series_2.index + time_diff
+
         results[i] = compare_func(
             series1,
             shifted_series_2)
@@ -35,8 +38,9 @@ def correlation(stock_series: pd.Series, sns_series : pd.Series) -> float :
         if i == len(stock_series)-1:
             continue
         #TODO: This is inefficent but the better way seems to not work - perhaps to do with types of datetime
-        mask = sns_series.index.to_series().between(stock_timestamp, stock_series.index[i+1])
-        relevantsentiments = sns_series[mask]
+        #mask = sns_series.index.to_series().between(stock_timestamp, stock_series.index[i+1])
+        #relevantsentiments = sns_series[mask]
+        relevantsentiments = sns_series[pd.to_datetime(stock_timestamp):pd.to_datetime(stock_series.index[i+1])]
         if (len(relevantsentiments) != 0):
             corresponding_sentiment[i] = np.mean(relevantsentiments)
         elif i != 0:
@@ -92,8 +96,8 @@ if __name__ == "__main__":
     sns_series = sns_data.set_index('timestamp').sentiment
 
 
-    print("Initial Correlation:")
-    print(correlation(stock_series, sns_series))
+    #print("Initial Correlation:")
+    #print(correlation(stock_series, sns_series))
 
 
     print("Rolling Correlations:")
