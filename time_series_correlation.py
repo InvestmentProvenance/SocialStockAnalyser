@@ -67,7 +67,7 @@ def correlation(stock_series: pd.Series, sns_series : pd.Series) -> float :
 def get_market_sentiment():
     """Returns a dataframe of the commment table. It has the timestamp, comment body and sentiment scores.
     Records without a """
-    df = pd.read_csv("wallstreetbets-posts-and-comments-for-august-2021-comments 1.csv")
+    df = pd.read_csv("wallstreetbets-posts-and-comments-for-august-2021-comments.csv")
     df['datetime'] = pd.to_datetime(df.created_utc, unit='s').dt.tz_localize('UTC') #get timestamps
     df = df[['datetime', 'body', 'sentiment']] #pick certain columns
     df =  df[df.sentiment.notna()] #extract rows with existing sentiment scores
