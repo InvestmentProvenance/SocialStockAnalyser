@@ -2,6 +2,7 @@
 import requests
 from bs4 import BeautifulSoup
 from database import db_stock
+import datetime
 
 def investors_hub_scraper(url):
     """Gets data from Investor Hub and uploads it to the db"""
@@ -12,10 +13,13 @@ def investors_hub_scraper(url):
     }
 
     #n = 0
+    date_format = "%m/%d/%y %I:%M %p"
     counter = -1# at the end of board you reach a ssection that is just 0 to 1 comments a page
-    comment_info = []
+    overallCounter = 0
+    number = 0
 
     while url is not None and counter != 0 and counter != 1:
+        comment_info = []
         counter = 0
 
         response = requests.get(url, headers=headers, timeout=30)
@@ -29,6 +33,18 @@ def investors_hub_scraper(url):
             for comment in comments:
                 counter += 1
                 time = comment.find("div", {"data-app": "message-timestamp"}).get_text().strip()
+                if "/" in time:
+                    datetime_object = datetime.datetime.strptime(time, date_format)
+                elif "minutes ago" in time:
+                    datetime_object = datetime.datetime.now() - datetime.timedelta(minutes=int(time.replace(" minutes ago","")))
+                elif time == "1 minute ago":
+                    datetime_object = datetime.now() - datetime.timedelta(minutes=1)
+                else:
+                    timeOfPost = datetime.datetime.strptime(time, "%I:%M %p").time()
+                    datetime_object = datetime.datetime.combine(datetime.datetime.now().date(), timeOfPost)
+
+
+
                 text = comment.find("p", {"class": "mb-0"})
                 user = comment.find("a" , {
                     "class": "text-blue-link message-author font-weight-bold pt-0 mt-0"
@@ -49,15 +65,25 @@ def investors_hub_scraper(url):
                 #lines = (line.strip() for line in text.splitlines())
                 # break multi-headlines into a line each
                 #chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-                comment_info.append([user,time,text,reply_number*2 + ecount])
+                comment_info.append([user,datetime_object,text,int(reply_number)*2 + ecount,"investorshub.com", "NIO"])
+                number = comment.find("a", {"class":"text-dark"}).get_text().strip()
+
 
 
         buttons = soup.find_all("a", {"class":"mt-1 mr-2 btn blue-style-btn text-decoration-none"})
         url = None
+        #print(counter)
         for b in buttons:
             if b.get_text().strip() == "Older":
                 url = b.get("href")
                 break
 
-    db_stock.upload_sns(raw_data = comment_info, site = "investorshub", symbol = "gme")
+        overallCounter = overallCounter + counter
+        print(number)
+        db_stock.upload_sns(raw_data = comment_info)
+
     print(":)")
+
+
+#investors_hub_scraper("https://investorshub.advfn.com/AMC-Entertainment-Holdings-Inc-AMC-27733?nextStart=10731")
+investors_hub_scraper("https://investorshub.advfn.com/Nio-Inc-NIO-36185")

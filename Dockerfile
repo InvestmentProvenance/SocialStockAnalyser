@@ -6,6 +6,7 @@ FROM mcr.microsoft.com/devcontainers/python:3.11
 
 #To add packages just do pip install _ then pip freeze > requirements.txt and then anyone else can rebuild the docker container to get the same packages
 RUN pip install --upgrade pip
+RUN pip install --vaderSentiment
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
