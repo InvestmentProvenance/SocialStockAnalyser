@@ -22,7 +22,7 @@ try:
         sentiment = blob.sentiment.polarity
         update_query = f"UPDATE sns_comments SET vadersentiment_pos={sentiment} WHERE CommentID={row[0]}"# need to rename column to textblobsentiment
         cursor.execute(update_query)
-        connection.commit()
+    connection.commit()
 
         
 except pymysql.Error as e:
