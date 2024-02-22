@@ -12,7 +12,9 @@
 		"vscode": {
 			"extensions": [
 				"ms-python.pylint",
-				"ms-azuretools.vscode-docker"
+				"ms-azuretools.vscode-docker",
+				"mhutchie.git-graph",
+				"ms-toolsai.jupyter"
 			]
 		}
 	}

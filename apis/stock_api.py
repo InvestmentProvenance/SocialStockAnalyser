@@ -1,4 +1,4 @@
-"""Makes requests to AlphaVantage"""
+"""Module to make requests to the AlphaVantage API and save the data to a file"""
 import os
 from datetime import datetime, timedelta
 import requests
@@ -12,16 +12,37 @@ INTERVAL = '5min'
 
 
 
-def make_request():
+def make_request(start_month:datetime,end_month:datetime):
     """Makes a Request to AlphaVantage API and saves to a file"""
-    # Calculate the start and end months for the past 60 months
-    end_month = datetime.now()
-    start_month = end_month - timedelta(days=60 * 30)  # 30 days per month approximation
 
     # Initialize counters for API keys and calls
     api_key_index = 0
     calls_per_key = 0
 
+    current_month = datetime(start_month)
+
+    while current_month <= end_month:
+        month_str = start_month.strftime('%Y-%m')
+        url = (f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY"
+            f"&symbol={SYMBOL}"
+            f"&interval={INTERVAL}"
+            f"&apikey={API_KEYS[api_key_index]}"
+            f"&outputsize=full"
+            f"&datatype=csv&month={month_str}")
+        r = requests.get(url,timeout=10)
+        if r.status_code != 200:
+            print(f"Error: Unable to retrieve data for {month_str}. "
+            f"Status code: {r.status_code}")
+        elif 'rate limit' in r.text: #if rate limit has been reached
+            print(f"Error: Unable to retrieve data for {month_str}. "
+            f"Daily Rate limit was reached.")
+        else:   #success
+            print(r.content)
+            calls_per_key += 1
+            if calls_per_key >= 25:
+                api_key_index = (api_key_index + 1) % len(API_KEYS)
+                calls_per_key = 0
+        start_month = start_month + timedelta(days=30)
     while start_month <= end_month:
         # Format the date in YYYY-MM format
         month_str = start_month.strftime('%Y-%m')
