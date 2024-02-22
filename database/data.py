@@ -2,6 +2,7 @@
 import datetime
 import pandas as pd
 from database import db_stock
+import numpy as np
 
 def get_data(ticker:str, start_time:datetime, end_time:datetime) -> pd.DataFrame :
     """Retrieves the stock data for the given ticker from the database
@@ -46,3 +47,9 @@ def chat_volume(ticker:str, start_time:datetime, end_time:datetime, intervals:pd
     pass
 
 #TODO: Add log normal - needs to return pandas series
+
+def log_normal(series : pd.Series) -> pd.Series:
+    """Performs log(x_n+1/x_n) on each item"""
+    k = series.pct_change(1)
+    k.apply(lambda x : np.log(x+1))
+    return k
