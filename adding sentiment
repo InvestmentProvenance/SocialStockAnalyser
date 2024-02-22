@@ -19,14 +19,14 @@ try:
     table_data = cursor.fetchall()
     for i in tqdm(range(len(table_data)//100)):
         query = ""
-        for row in tqdm(table_data[100*i:100*(i+1)]):
+        for row in table_data[100*i:100*(i+1)]:
             blob = TextBlob(row[11])
             sentiment = blob.sentiment.polarity
             query +=f"UPDATE sns_comments SET vadersentiment_pos={sentiment} WHERE CommentID={row[0]} ; "# need to rename column to textblobsentiment
         #print(query)
         cursor.execute(query)
         connection.commit()
-        break
+
 
         
 except pymysql.Error as e:
