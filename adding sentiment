@@ -2,6 +2,7 @@ import os
 import pymysql
 from textblob import TextBlob
 from tqdm import tqdm
+from pymysql.constants import CLIENT
 
 host = os.environ.get("DB_HOST","investdata.c5cwsai4kiot.us-east-1.rds.amazonaws.com")
 user = os.environ.get("DB_USER","admin")
@@ -10,19 +11,22 @@ database = os.environ.get("DB_NAME","your_database_name")
 
 try:
     # Connect to the MySQL server
-    connection = pymysql.connect(host=host, user=user, password=password, database=database)
+    connection = pymysql.connect(host=host, user=user, password=password, database=database,client_flag  = CLIENT.MULTI_STATEMENTS)
     cursor = connection.cursor()
     select_query = f"SELECT * FROM {'sns_comments'}"
 
     cursor.execute(select_query)
     table_data = cursor.fetchall()
-
-    for row in tqdm(table_data):
-        blob = TextBlob(row[11])
-        sentiment = blob.sentiment.polarity
-        update_query = f"UPDATE sns_comments SET vadersentiment_pos={sentiment} WHERE CommentID={row[0]}"# need to rename column to textblobsentiment
-        cursor.execute(update_query)
-    connection.commit()
+    for i in tqdm(range(len(table_data)//100)):
+        query = ""
+        for row in tqdm(table_data[100*i:100*(i+1)]):
+            blob = TextBlob(row[11])
+            sentiment = blob.sentiment.polarity
+            query +=f"UPDATE sns_comments SET vadersentiment_pos={sentiment} WHERE CommentID={row[0]} ; "# need to rename column to textblobsentiment
+        #print(query)
+        cursor.execute(query)
+        connection.commit()
+        break
 
         
 except pymysql.Error as e:
