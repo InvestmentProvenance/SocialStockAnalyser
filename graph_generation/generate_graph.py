@@ -41,9 +41,7 @@ def graph_over_time(filename, time_serieses,
     plt.savefig(filename)  # Save the figure to a file
     plt.show()  # Display the plot
 
-# Example usage:
-# Assuming you have created time series objects and put them in a list named 'time_serieses'
-# Also assuming you have defined start_date and end_date
+
 # graph_over_time("output.png", time_serieses, start_date, end_date)
 if __name__ == '__main__':
     GME_PV = data.price_volume("GME",
