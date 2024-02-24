@@ -2,7 +2,7 @@
 import datetime
 import pandas as pd
 #change this line based on what the file directory is
-import db_stock
+import database.db_stock as db_stock
 #from database import db_stock
 import numpy as np
 

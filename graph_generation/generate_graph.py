@@ -1,6 +1,8 @@
+import sys
+sys.path.insert(1, '/workspaces/SocialStockAnalyser') # Super hacky
 import matplotlib.pyplot as plt
 import pandas as pd
-from database import data
+import database.data as data
 class graph_time_series:
     def __init__(self, time_series, title, as_line=True):
         self.time_series = time_series
@@ -37,7 +39,15 @@ def graph_over_time(filename, time_serieses,
 # Also assuming you have defined start_date and end_date
 # graph_over_time("output.png", time_serieses, start_date, end_date)
 if __name__ == '__main__':
-    GME_pv = data.price_volume("GME",
+    gme_pv = data.price_volume("GME",
                                pd.Timestamp(year = 2021,  month = 1, day = 1),
     pd.Timestamp(year = 2021,  month = 12, day = 31) )
-    pass
+    GME_chat_volume = data.chat_volume("GME",pd.Timestamp(year = 2021,  month = 1, day = 1),
+    pd.Timestamp(year = 2021,  month = 12, day = 31))
+    graph_over_time("output.png",
+                    [graph_time_series(gme_pv, "GME Price Volume", True),
+                     graph_time_series(GME_chat_volume, "GME Chat Volume", True)
+                     ],
+                    pd.Timestamp(year = 2021,  month = 1, day = 1),
+                    pd.Timestamp(year = 2021,  month = 12, day = 31), "GME Price Volume", "Price Volume", "Time")
+    
