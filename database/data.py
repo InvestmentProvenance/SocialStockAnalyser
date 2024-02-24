@@ -1,8 +1,9 @@
 """Provides functionality to download and upload pandas dataframes from the DB"""
 import datetime
+import sys
 import pandas as pd
-#change this line based on what the file directory is
-import db_stock
+sys.path.insert(1, '/workspaces/SocialStockAnalyser') # Super hacky
+import database.db_stock as db_stock
 #from database import db_stock
 import numpy as np
 
@@ -51,25 +52,17 @@ def price_volume(ticker:str, start_time:datetime, end_time:datetime, intervals: 
     #TODO fix error due l=low granularity in timeframes when out of market hours, NaN error encountered
 #WARNING
 
-#                 _   _             
-#                | | (_)            
-#  ___ __ _ _   _| |_ _  ___  _ __  
-# / __/ _` | | | | __| |/ _ \| '_ \ 
-#| (_| (_| | |_| | |_| | (_) | | | |
-# \___\__,_|\__,_|\__|_|\___/|_| |_|
 
     return None
 
 
     pass
-print(price_volume("GME", datetime.datetime(2021, 1, 1), datetime.datetime(2021, 1, 30), pd.Timedelta(10, "min")))
 def naive_time_sentiment_aggregator(ticker:str, start_time:datetime, end_time:datetime, intervals:pd.Timedelta) -> pd.DataFrame :
     data = get_sns_data(ticker, start_time, end_time)
     #print(data)
     #print(data.columns)
     #return data.groupby(pd.Grouper(key='datetime', freq=intervals)).sum()
     return data.groupby(pd.Grouper(level='datetime', freq=intervals)).sum()
-    pass
 
 def chat_volume(ticker:str, start_time:datetime, end_time:datetime, intervals: pd.Timedelta = pd.Timedelta(5,"min")) -> pd.Series :
     data = get_sns_data(ticker, start_time, end_time)
@@ -77,7 +70,6 @@ def chat_volume(ticker:str, start_time:datetime, end_time:datetime, intervals: p
     #print(data.columns)
     #return data.groupby(pd.Grouper(key='datetime', freq=intervals)).sum()
     return data.groupby(pd.Grouper(level='datetime', freq=intervals)).count()['sentiment'].squeeze()
-    pass
 
 #Testing Function
 #print(chat_volume("GME",datetime.time(0,0,0), datetime.time(0,0,0),pd.Timedelta(75, "min")))
@@ -85,10 +77,12 @@ def chat_volume(ticker:str, start_time:datetime, end_time:datetime, intervals: p
 
 
 
-#TODO: Add log normal - needs to return pandas series
 
 def log_normal(series : pd.Series) -> pd.Series:
     """Performs log(x_n+1/x_n) on each item"""
     k = series.pct_change(1)
     k.apply(lambda x : np.log(x+1))
     return k
+
+if __name__ =='__main__':
+    print(price_volume("GME", datetime.datetime(2021, 1, 1), datetime.datetime(2021, 1, 30), pd.Timedelta(10, "min")))

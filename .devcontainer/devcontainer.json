@@ -14,7 +14,8 @@
 				"ms-python.pylint",
 				"ms-azuretools.vscode-docker",
 				"mhutchie.git-graph",
-				"ms-toolsai.jupyter"
+				"ms-toolsai.jupyter",
+				"wayou.vscode-todo-highlight"
 			]
 		}
 	}
