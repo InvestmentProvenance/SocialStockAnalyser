@@ -16,7 +16,7 @@ testing = os.environ['TESTING']
 
 def db_operation(func: Callable[..., pymysql.connect ]):
     """Decorator to Provide a database connection to the function with named argument 'database'
-      and close it after the operation is done. """
+        and close it after the operation is done. """
     def wrap(*args, **kwargs):
         # Before each DB opertaion we have to establish a connection and then close it after
         try:
@@ -33,16 +33,39 @@ def db_operation(func: Callable[..., pymysql.connect ]):
     return wrap
 
 @db_operation
-def upload_stock(raw_data,
-                 database:pymysql.connect = None):
-    """Uploads stock data to the database. raw_data is a collection of tuples"""
+def upload_data(insert_sql, raw_data, database:pymysql.connect = None):
+    """Uploads the passed raw_data to the database, using the given SQL"""
     cursor = database.cursor()
-    insert_sql = """
-    INSERT INTO stock_data (timestamp, open, high, low, close, volume, symbol)
-    VALUES (%s, %s, %s, %s, %s, %s, %s)
-    """
     cursor.executemany(insert_sql, raw_data)
     database.commit()
+
+def upload_stock(raw_data):
+    """Uploads stock data to the database. raw_data is a collection of tuples
+        of the form (timestamp, open, high, low, close, volume, symbol) """
+    insert_sql = """
+        INSERT INTO raw_data (timestamp, open, high, low, close, volume, symbol)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """
+    upload_data(insert_sql, raw_data)
+
+def upload_sns(raw_data):
+    """Uploads sns data to database""" #TODO: how to format the data?
+    insert_sql = """
+        INSERT INTO sns_comments (username, timestamp, body, score, site, symbol)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        """
+    upload_data(insert_sql, raw_data)
+
+def upload_test():
+    """Uploads test_data to the table Testing(Name, Age, Birthtime)"""
+    test_data = [("Bob Middlestone", "23", "2000-12-11 12:13:14Z"),
+                 ("Puneet Puskás", "0", "2023-02-25 13:57:23Z"),
+                 ("Antía Lindholm", "44", "1950-09-30 00:00:00Z")]
+    insert_sql = """
+        INSERT INTO Testing(Name, Age, Birthtime)
+        VALUES (%s, %s, %s)
+        """
+    upload_data(insert_sql, test_data)
 
 @db_operation
 def read_stock(
@@ -69,19 +92,10 @@ def read_stock(
     # Display the table data
     return table_data
 
-@db_operation
-def upload_sns(raw_data, database:pymysql.connect = None):
-    """Uploadssns data to databse - TODO: how to format the data?"""
-    cursor = database.cursor()
-    insert_sql = """
-    INSERT INTO sns_comments (username, timestamp, body, score, site, symbol)
-    VALUES (%s, %s, %s, %s, %s, %s)
-    """
-    cursor.executemany(insert_sql, raw_data)
-    database.commit()
 
 if __name__ == '__main__':
-    print(read_stock(
-        ticker = "GME",
-        start_date = datetime(2021, 1, 1),
-        end_date = datetime(2021, 1, 30)))
+    test_upload()
+    # print(read_stock(
+    #     ticker = "GME",
+    #     start_date = datetime(2021, 1, 1),
+    #     end_date = datetime(2021, 1, 30)))
