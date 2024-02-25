@@ -18,8 +18,10 @@ def view_all_tables(database_connection):
 
     # Close cursor
     cursor.close()
+    print("Tables in the database:")
+    for table in tables:
+        print(table)
 
-    return tables
 
 def view_table_data(database_connection, table_name):
     """
