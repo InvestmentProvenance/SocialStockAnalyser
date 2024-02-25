@@ -1,11 +1,11 @@
 """Provides functionality to download and upload pandas dataframes from the DB"""
 import datetime
 import sys
-import pandas as pd
-sys.path.insert(1, '/workspaces/SocialStockAnalyser') # Super hacky
-import database.db_stock as db_stock
-#from database import db_stock
 import numpy as np
+import pandas as pd
+import database.db_stock as db_stock
+sys.path.insert(1, '/workspaces/SocialStockAnalyser') # Super hacky
+#from database import db_stock
 
 def get_data(ticker:str, start_time:datetime, end_time:datetime) -> pd.DataFrame :
     """Retrieves the stock data for the given ticker from the database
@@ -14,8 +14,9 @@ def get_data(ticker:str, start_time:datetime, end_time:datetime) -> pd.DataFrame
     print("first: ", raw_data[0])
     print("last: ", raw_data[-1])
     df = pd.DataFrame(raw_data,
-    columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'symbol'])
+        columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'symbol'])
     df['timestamp'] = pd.to_datetime(df['timestamp'])
+    df.set_index('timestamp', inplace=True)
     return df
 
 def upload_data(csv_data:pd.DataFrame):
@@ -45,7 +46,7 @@ def get_sns_data(ticker:str, start_time:datetime, end_time:datetime) -> pd.DataF
 #Series should be indexed by datetimes
 def price_volume(ticker:str, start_time:datetime, end_time:datetime, intervals: pd.Timedelta = pd.Timedelta(5,"min")) -> pd.Series :
     #generates the price * volume for a given time index with the mean of the open and close in the interval
-    data = get_data(ticker, start_time, end_time).sort_values(by=['timestamp'])
+    data = get_data(ticker, start_time, end_time).sort_values(by=['timestamp']) #TODO: Stock data already comes out sorted by timestamp -ab2886
     data = data.groupby(pd.Grouper(key='timestamp', freq=intervals)).agg({'open':'first', 'close':'last', 'low' : 'min','high' : 'max',  'volume' : 'sum', 'symbol' : 'first'})
     #print(data)
     return pd.Series((data.volume*(data.open + data.close)/2),index= data.index).interpolate()
