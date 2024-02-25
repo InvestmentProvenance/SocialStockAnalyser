@@ -43,7 +43,7 @@ def upload_stock(raw_data:List[Tuple[Any, ...]]) -> None:
     """Uploads stock data to the database. raw_data is a collection of tuples
         of the form (timestamp, open, high, low, close, volume, symbol) """
     insert_sql = """
-        INSERT INTO raw_data (timestamp, open, high, low, close, volume, symbol)
+        INSERT INTO stock_data (timestamp, open, high, low, close, volume, symbol)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
     upload_data(insert_sql, raw_data)
