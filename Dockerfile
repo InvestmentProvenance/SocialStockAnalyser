@@ -12,6 +12,10 @@ RUN pip install -r requirements.txt
 #Uncomment to create the directory that stock_api_caller.py uses, on container build
 #RUN mkdir -p /home/vscode/Desktop/Stockdata
 
+#Install git command autocomplete
+RUN apt-get update && apt-get install -y bash-completion
+RUN echo "source /usr/share/bash-completion/completions/git" >> ~/.bashrc
+
 
 ENV DB_HOST "investdata.c5cwsai4kiot.us-east-1.rds.amazonaws.com"
 ENV DB_USER "admin"
