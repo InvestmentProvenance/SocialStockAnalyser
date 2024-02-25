@@ -93,7 +93,7 @@ def read_stock(
 
 def read_test() -> None:
     """Tests the read_data function."""
-    select_query = """SELECT * 
+    select_query = """SELECT *
         FROM your_database_name.Testing 
         WHERE Birthtime BETWEEN '1999-03-02 14:14:14' AND '2023-02-25 13:57:24'"""
     print(read_data(select_query))
