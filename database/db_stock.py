@@ -94,8 +94,8 @@ def read_stock(
 
 
 if __name__ == '__main__':
-    test_upload()
-    # print(read_stock(
-    #     ticker = "GME",
-    #     start_date = datetime(2021, 1, 1),
-    #     end_date = datetime(2021, 1, 30)))
+    # upload_test()
+    print(read_stock(
+        ticker = "GME",
+        start_date = datetime(2021, 1, 1),
+        end_date = datetime(2021, 1, 30)))
