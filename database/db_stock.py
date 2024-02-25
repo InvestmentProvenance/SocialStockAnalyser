@@ -91,6 +91,18 @@ def read_stock(
         f"BETWEEN '{start_date}' AND '{end_date}' AND Symbol = '{ticker}' ORDER BY TimeStamp")
     return read_data(select_query)
 
+def read_sns(ticker:str, start_date:datetime, end_date:datetime) -> List[Tuple[Any, ...]]:
+    """Gets the TextBlob sentiment for the given ticker, between the given dates."""
+    #The database column name (vadersentiment_pos) is a misnomer (it actually represents the
+    #mixed score of the TextBlob sentiment analyser).
+    select_query = f"""
+        SELECT `timestamp`, vadersentiment_pos
+        FROM sns_comments
+        WHERE `timestamp` BETWEEN '{start_date}' AND '{end_date}'
+        AND symbol = '{ticker}'
+        ORDER BY `timestamp`"""
+    return read_data(select_query)
+
 def read_test() -> None:
     """Tests the read_data function."""
     select_query = """SELECT *

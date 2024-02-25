@@ -1,5 +1,6 @@
 """Provides functionality to download and upload pandas dataframes from the DB"""
-import datetime
+from datetime import datetime
+# import datetime
 import sys
 import numpy as np
 import pandas as pd
@@ -28,19 +29,16 @@ def upload_data(csv_data:pd.DataFrame):
 
 #Reuben's Job:
 #TODO: read from database instead of file
-def get_sns_data(ticker:str, start_time:datetime, end_time:datetime) -> pd.DataFrame :
-    """NOT THE ACTUAL METHOD, JUST A PALCEHOLDER FOR BRIJ TO TEST"""
-    df = pd.read_csv("wallstreetbets-posts-and-comments-for-august-2021-comments.csv")
-    df['datetime'] = pd.to_datetime(df.created_utc, unit='s').dt.tz_localize('UTC') #get timestamps
-    df.set_index('datetime', inplace=True)
-    df = df[['body', 'sentiment']] #pick certain columns
-    df =  df[df.sentiment.notna()] #extract rows with existing sentiment scores
-    
-    gme_mentions = df.body.str.contains("GME", case=False)
-    gamestop_mentions = df.body.str.contains("gamestop", case=False)
-    return df[gamestop_mentions | gme_mentions]
-
-
+def get_sns_data(ticker:str, start_date:datetime, end_date:datetime) -> pd.DataFrame:
+    """Return a dataframe containing the TextBlob sentiment of comments that refer to a specific 
+        ticker within the given timerange. The dataframe contains only a sentiment column, and 
+        is indexed and ordered by timestamp."""
+    raw_data = db_stock.read_sns(ticker=ticker,start_date=start_date,end_date=end_date)
+    df = pd.DataFrame(raw_data,
+        columns=['timestamp', 'sentiment'])
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
+    df.set_index('timestamp', inplace=True)
+    return df
 
 #Brij's Job:
 #Series should be indexed by datetimes
@@ -86,4 +84,5 @@ def log_normal(series : pd.Series) -> pd.Series:
     return k
 
 if __name__ =='__main__':
-    print(price_volume("GME", datetime.datetime(2021, 1, 1), datetime.datetime(2021, 1, 30), pd.Timedelta(10, "min")))
+    # print(price_volume("GME", datetime.datetime(2021, 1, 1), datetime.datetime(2021, 1, 30), pd.Timedelta(10, "min")))
+    print(df = get_sns_data( "GME", start_date = datetime(2021, 1, 1), end_date = datetime(2021, 1, 30)))
