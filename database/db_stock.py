@@ -33,13 +33,13 @@ def db_operation(func: Callable[..., pymysql.connect ]):
     return wrap
 
 @db_operation
-def upload_data(insert_sql : str, raw_data, database:pymysql.connect = None):
+def upload_data(insert_sql : str, raw_data:List[Tuple[Any, ...]], database:pymysql.connect = None):
     """Uploads the passed raw_data to the database, using the given SQL"""
     cursor = database.cursor()
     cursor.executemany(insert_sql, raw_data)
     database.commit()
 
-def upload_stock(raw_data) -> None:
+def upload_stock(raw_data:List[Tuple[Any, ...]]) -> None:
     """Uploads stock data to the database. raw_data is a collection of tuples
         of the form (timestamp, open, high, low, close, volume, symbol) """
     insert_sql = """
@@ -48,7 +48,7 @@ def upload_stock(raw_data) -> None:
         """
     upload_data(insert_sql, raw_data)
 
-def upload_sns(raw_data) -> None:
+def upload_sns(raw_data:List[Tuple[Any, ...]]) -> None:
     """Uploads sns data to database""" #TODO: how to format the data?
     insert_sql = """
         INSERT INTO sns_comments (username, timestamp, body, score, site, symbol)
@@ -69,6 +69,7 @@ def upload_test() -> None:
 
 @db_operation
 def read_data(select_query:str, database:pymysql.connect=None) -> List[Tuple[Any, ...]]:
+    """Performs the given select_query, and returns the output as a list of tuples."""
     print("reading")
     cursor = database.cursor()
     print(select_query)
@@ -91,6 +92,7 @@ def read_stock(
     return read_data(select_query)
 
 def read_test() -> None:
+    """Tests the read_data function."""
     select_query = """SELECT * 
         FROM your_database_name.Testing 
         WHERE Birthtime BETWEEN '1999-03-02 14:14:14' AND '2023-02-25 13:57:24'"""
