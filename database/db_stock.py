@@ -33,13 +33,13 @@ def db_operation(func: Callable[..., pymysql.connect ]):
     return wrap
 
 @db_operation
-def upload_data(insert_sql, raw_data, database:pymysql.connect = None):
+def upload_data(insert_sql : str, raw_data, database:pymysql.connect = None):
     """Uploads the passed raw_data to the database, using the given SQL"""
     cursor = database.cursor()
     cursor.executemany(insert_sql, raw_data)
     database.commit()
 
-def upload_stock(raw_data):
+def upload_stock(raw_data) -> None:
     """Uploads stock data to the database. raw_data is a collection of tuples
         of the form (timestamp, open, high, low, close, volume, symbol) """
     insert_sql = """
@@ -48,7 +48,7 @@ def upload_stock(raw_data):
         """
     upload_data(insert_sql, raw_data)
 
-def upload_sns(raw_data):
+def upload_sns(raw_data) -> None:
     """Uploads sns data to database""" #TODO: how to format the data?
     insert_sql = """
         INSERT INTO sns_comments (username, timestamp, body, score, site, symbol)
@@ -56,7 +56,7 @@ def upload_sns(raw_data):
         """
     upload_data(insert_sql, raw_data)
 
-def upload_test():
+def upload_test() -> None:
     """Uploads test_data to the table Testing(Name, Age, Birthtime)"""
     test_data = [("Bob Middlestone", "23", "2000-12-11 12:13:14Z"),
                  ("Puneet Puskás", "0", "2023-02-25 13:57:23Z"),
