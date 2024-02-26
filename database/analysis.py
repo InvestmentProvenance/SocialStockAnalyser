@@ -65,4 +65,10 @@ def plotTwoSeries(red : pd.Series, blue : pd.Series) -> None:
     plt.legend(handles=[red_plot, blue_plot])
     plt.show()
 
-print(stock_log_normal_parkinson_variance("GME", datetime(2021, 1, 1), datetime(2021, 1, 30)))
+def autocorrelate(series: pd.Series) -> pd.Series:
+    data = [(i, series.autocorr(i)) for i in range(100)]
+    df = pd.DataFrame(data, columns=['lag', f'{series.name} autocorrelation'])
+    return pd.Series(df.set_index('lag').iloc[:, 0])
+
+# print(stock_log_normal_parkinson_variance("GME", datetime(2021, 1, 1), datetime(2021, 1, 30)))
+print(autocorrelate(data.get_sns_data("GME", datetime(2021, 1, 1), datetime(2021, 1, 30)).sentiment))
