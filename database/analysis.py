@@ -1,3 +1,20 @@
+"""Does statistical analysis"""
+from typing import List, Tuple
+import datetime
+import pandas as pd
+from pandas.api.types import is_datetime64_any_dtype
+import numpy as np
+import time_series_correlation
+#Open charts in new windows
+
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from matplotlib.ticker import ScalarFormatter #To avoid scientific notation
+
+COMMENTS_DATA = "wallstreetbets-posts-and-comments-for-august-2021-comments.csv"
+STOCK_DATA = ""
+
+
 def plotTwoSeries(red : pd.Series, blue : pd.Series) -> None:
     """Plots both the given series. Both series need to have an datetime index"""
     fig, red_ax = plt.subplots()
