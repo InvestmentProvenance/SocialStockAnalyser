@@ -29,6 +29,12 @@ def stock_log_normal_parkinson_variance(ticker:str, start_time:datetime, end_tim
     # Calculate the average variance across all rows to represent the overall period's variance
     return df['parkinson_variance']
 
+def chat_velocity(sentiment : pd.Series) -> pd.Series:
+    """Group comment count into 5min intervals, returns a Series object"""
+    velocity = sentiment.resample('5min').size()
+    velocity.name = "Chat Velocity"
+    return velocity
+
 def plotSeries(series : pd.Series) -> None:
     """Plots the given series. The series needs to have a datetime index"""
     fig, ax = plt.subplots()
