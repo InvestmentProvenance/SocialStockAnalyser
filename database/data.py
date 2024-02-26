@@ -5,6 +5,7 @@ import sys
 import numpy as np
 import pandas as pd
 import db_stock
+import math
 sys.path.insert(1, '/workspaces/SocialStockAnalyser') # Super hacky
 #from database import db_stock
 
@@ -40,6 +41,18 @@ def get_sns_data(ticker:str, start_date:datetime, end_date:datetime) -> pd.DataF
     df.set_index('timestamp', inplace=True)
     return df
 
+def get_sns_data_transformed(ticker:str, start_date:datetime, end_date:datetime) -> pd.DataFrame:
+    """Return a dataframe containing the TextBlob sentiment of comments that refer to a specific 
+        ticker within the given timerange. The dataframe contains only a sentiment column, and 
+        is indexed and ordered by timestamp."""
+    raw_data = db_stock.read_sns(ticker=ticker,start_date=start_date,end_date=end_date)
+    df = pd.DataFrame(raw_data,
+        columns=['timestamp', 'sentiment'])
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
+    df.set_index('timestamp', inplace=True)
+    df['sentiment'].apply(lambda x : 1 + (-2/(1+math.exp(10*(x-0.5)))))
+    return df
+
 #Brij's Job:
 #Series should be indexed by datetimes
 def price_volume(ticker:str, start_time:datetime, end_time:datetime, intervals: pd.Timedelta = pd.Timedelta(5,"min")) -> pd.Series :
@@ -57,17 +70,18 @@ def naive_time_sentiment_aggregator(ticker:str, start_time:datetime, end_time:da
     #print(data)
     #print(data.columns)
     #return data.groupby(pd.Grouper(key='datetime', freq=intervals)).sum()
-    return data.groupby(pd.Grouper(level='datetime', freq=intervals)).sum()
+    return data.groupby(pd.Grouper(level='timestamp', freq=intervals)).sum()
 
 def chat_volume(ticker:str, start_time:datetime, end_time:datetime, intervals: pd.Timedelta = pd.Timedelta(5,"min")) -> pd.Series :
     data = get_sns_data(ticker, start_time, end_time)
     #print(data)
+    #print(data)
     #print(data.columns)
     #return data.groupby(pd.Grouper(key='datetime', freq=intervals)).sum()
-    return data.groupby(pd.Grouper(level='datetime', freq=intervals)).count()['sentiment'].squeeze()
+    return data.groupby(pd.Grouper(level='timestamp', freq=intervals)).count()['sentiment'].squeeze()
 
 #Testing Function
-#print(chat_volume("GME",datetime.time(0,0,0), datetime.time(0,0,0),pd.Timedelta(75, "min")))
+#print(chat_volume("GME",datetime(2021, 1, 1), datetime(2021, 1, 30),pd.Timedelta(75, "min")))
 def log_normal(series : pd.Series) -> pd.Series:
     """Performs log(x_n+1/x_n) on each item"""
     k = series.pct_change(1)
