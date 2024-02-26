@@ -44,13 +44,14 @@ def get_sns_data(ticker:str, start_date:datetime, end_date:datetime) -> pd.DataF
 #Series should be indexed by datetimes
 def price_volume(ticker:str, start_time:datetime, end_time:datetime, intervals: pd.Timedelta = pd.Timedelta(5,"min")) -> pd.Series :
     #generates the price * volume for a given time index with the mean of the open and close in the interval
-    data = get_data(ticker, start_time, end_time).sort_values(by=['timestamp']) #TODO: Stock data already comes out sorted by timestamp -ab2886
-    data = data.groupby(pd.Grouper(key='timestamp', freq=intervals)).agg({'open':'first', 'close':'last', 'low' : 'min','high' : 'max',  'volume' : 'sum', 'symbol' : 'first'})
+    data = get_data(ticker, start_time, end_time)#.sort_values(by=['timestamp']) #TODO: Stock data already comes out sorted by timestamp -ab2886
+    data = data.groupby(pd.Grouper(level='timestamp', freq=intervals)).agg({'open':'first', 'close':'last', 'low' : 'min','high' : 'max',  'volume' : 'sum', 'symbol' : 'first'})
     #print(data)
     return pd.Series((data.volume*(data.open + data.close)/2),index= data.index).interpolate()
     #TODO fix error due l=low granularity in timeframes when out of market hours, NaN error encountered
 #WARNING
 
+#print(price_volume("GME", datetime(2021, 1, 1), datetime(2021, 1, 30), pd.Timedelta(10, "min")))
 def naive_time_sentiment_aggregator(ticker:str, start_time:datetime, end_time:datetime, intervals:pd.Timedelta) -> pd.DataFrame :
     data = get_sns_data(ticker, start_time, end_time)
     #print(data)
@@ -76,4 +77,5 @@ def log_normal(series : pd.Series) -> pd.Series:
 
 if __name__ =='__main__':
     # print(price_volume("GME", datetime.datetime(2021, 1, 1), datetime.datetime(2021, 1, 30), pd.Timedelta(10, "min")))
-    print(df = get_sns_data( "GME", start_date = datetime(2021, 1, 1), end_date = datetime(2021, 1, 30)))
+    df = get_sns_data( "GME", start_date = datetime(2021, 1, 1), end_date = datetime(2021, 1, 30))
+    print(df)
