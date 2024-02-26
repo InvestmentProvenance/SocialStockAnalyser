@@ -4,7 +4,7 @@ from datetime import datetime
 import sys
 import numpy as np
 import pandas as pd
-import database.db_stock as db_stock
+import db_stock as db_stock
 sys.path.insert(1, '/workspaces/SocialStockAnalyser') # Super hacky
 #from database import db_stock
 
@@ -51,11 +51,6 @@ def price_volume(ticker:str, start_time:datetime, end_time:datetime, intervals: 
     #TODO fix error due l=low granularity in timeframes when out of market hours, NaN error encountered
 #WARNING
 
-
-    return None
-
-
-    pass
 def naive_time_sentiment_aggregator(ticker:str, start_time:datetime, end_time:datetime, intervals:pd.Timedelta) -> pd.DataFrame :
     data = get_sns_data(ticker, start_time, end_time)
     #print(data)
