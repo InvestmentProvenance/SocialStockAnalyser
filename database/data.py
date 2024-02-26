@@ -73,10 +73,6 @@ def chat_volume(ticker:str, start_time:datetime, end_time:datetime, intervals: p
 #Testing Function
 #print(chat_volume("GME",datetime.time(0,0,0), datetime.time(0,0,0),pd.Timedelta(75, "min")))
 
-
-
-
-
 def log_normal(series : pd.Series) -> pd.Series:
     """Performs log(x_n+1/x_n) on each item"""
     k = series.pct_change(1)
