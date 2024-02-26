@@ -70,5 +70,12 @@ def autocorrelate(series: pd.Series) -> pd.Series:
     df = pd.DataFrame(data, columns=['lag', f'{series.name} autocorrelation'])
     return pd.Series(df.set_index('lag').iloc[:, 0])
 
-# print(stock_log_normal_parkinson_variance("GME", datetime(2021, 1, 1), datetime(2021, 1, 30)))
-print(autocorrelate(data.get_sns_data("GME", datetime(2021, 1, 1), datetime(2021, 1, 30)).sentiment))
+
+if __name__ == '__main__':
+    # print(stock_log_normal_parkinson_variance("GME", datetime(2021, 1, 1), datetime(2021, 1, 30)))
+    print(autocorrelate(data.get_sns_data("GME", datetime(2021, 1, 1), datetime(2021, 1, 30)).sentiment))
+    pv = data.price_volume("GME", datetime(2021, 1, 1), datetime(2021, 1, 30))
+    sentiment = data.get_sns_data("GME", datetime(2021, 1, 1), datetime(2021, 1, 30)).sentiment
+    chat_volume = data.chat_volume("GME", datetime(2021, 1, 1), datetime(2021, 1, 30))
+    plotTwoSeries(pv, sentiment)
+    plt.savefig("PV vs Sentiment.png")
