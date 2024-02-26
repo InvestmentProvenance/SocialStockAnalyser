@@ -5,6 +5,7 @@ import sys
 import numpy as np
 import pandas as pd
 import db_stock
+import math
 sys.path.insert(1, '/workspaces/SocialStockAnalyser') # Super hacky
 #from database import db_stock
 
@@ -38,6 +39,7 @@ def get_sns_data(ticker:str, start_date:datetime, end_date:datetime) -> pd.DataF
         columns=['timestamp', 'sentiment'])
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     df.set_index('timestamp', inplace=True)
+    df['sentiment'].apply(lambda x : 1 + (-2/(1+math.exp(10*(x-0.5)))))
     return df
 
 #Brij's Job:
