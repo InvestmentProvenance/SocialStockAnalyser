@@ -4,7 +4,7 @@ from datetime import datetime
 import sys
 import numpy as np
 import pandas as pd
-import db_stock as db_stock
+import db_stock
 sys.path.insert(1, '/workspaces/SocialStockAnalyser') # Super hacky
 #from database import db_stock
 
