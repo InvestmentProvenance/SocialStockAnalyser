@@ -57,17 +57,18 @@ def naive_time_sentiment_aggregator(ticker:str, start_time:datetime, end_time:da
     #print(data)
     #print(data.columns)
     #return data.groupby(pd.Grouper(key='datetime', freq=intervals)).sum()
-    return data.groupby(pd.Grouper(level='datetime', freq=intervals)).sum()
+    return data.groupby(pd.Grouper(level='timestamp', freq=intervals)).sum()
 
 def chat_volume(ticker:str, start_time:datetime, end_time:datetime, intervals: pd.Timedelta = pd.Timedelta(5,"min")) -> pd.Series :
     data = get_sns_data(ticker, start_time, end_time)
     #print(data)
+    #print(data)
     #print(data.columns)
     #return data.groupby(pd.Grouper(key='datetime', freq=intervals)).sum()
-    return data.groupby(pd.Grouper(level='datetime', freq=intervals)).count()['sentiment'].squeeze()
+    return data.groupby(pd.Grouper(level='timestamp', freq=intervals)).count()['sentiment'].squeeze()
 
 #Testing Function
-#print(chat_volume("GME",datetime.time(0,0,0), datetime.time(0,0,0),pd.Timedelta(75, "min")))
+#print(chat_volume("GME",datetime(2021, 1, 1), datetime(2021, 1, 30),pd.Timedelta(75, "min")))
 def log_normal(series : pd.Series) -> pd.Series:
     """Performs log(x_n+1/x_n) on each item"""
     k = series.pct_change(1)
