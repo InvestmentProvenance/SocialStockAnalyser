@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import db_stock
 import math
+from statistics import NormalDist
 sys.path.insert(1, '/workspaces/SocialStockAnalyser') # Super hacky
 #from database import db_stock
 
@@ -88,6 +89,16 @@ def log_normal(series : pd.Series) -> pd.Series:
     k.apply(lambda x : np.log(x+1))
     return k
 
+
+def confidence_interval(correlation:int, sample_number:int, conf_int:int = 0.95)->tuple:
+    r_prime = 0.5*math.log((1+correlation)/(1-correlation))
+    s_prime = 1/(math.sqrt(sample_number-3))
+    standard_dev = NormalDist().inv_cdf((1 + conf_int) / 2.)
+    lower_prime = r_prime + (standard_dev*s_prime)
+    upper_prime = r_prime - (standard_dev*s_prime)
+    upper = math.tanh(upper_prime)
+    lower = math.tanh(lower_prime)
+    return (upper,lower)
 
 if __name__ =='__main__':
     # print(price_volume("GME", datetime.datetime(2021, 1, 1), datetime.datetime(2021, 1, 30), pd.Timedelta(10, "min")))
