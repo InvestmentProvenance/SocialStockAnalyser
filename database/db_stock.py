@@ -68,8 +68,8 @@ def upload_test() -> None:
     upload_data(insert_sql, test_data)
 
 @db_operation
-def read_data(select_query:str, database:pymysql.connect=None) -> List[Tuple[Any, ...]]:
-    """Performs the given select_query, and returns the output as a list of tuples."""
+def read_data(select_query:str, database:pymysql.connect=None) -> Tuple[Tuple[Any, ...]]:
+    """Performs the given select_query, and returns the output as a tuple of tuples."""
     print("reading")
     cursor = database.cursor()
     print(select_query)
@@ -82,7 +82,7 @@ def read_data(select_query:str, database:pymysql.connect=None) -> List[Tuple[Any
 def read_stock(
     ticker:str,
     start_date:datetime,
-    end_date:datetime) -> List[Tuple[Any, ...]]: #This type could be made more stringent.
+    end_date:datetime) -> Tuple[Tuple[Any, ...]]: #This type could be made more stringent.
     """Retrieves the stock data for the given ticker from the database, for the last 30 days,
         chronologically ordered"""
     start_date = end_date - timedelta(days=30)  # 30 days per month approximation
@@ -91,7 +91,7 @@ def read_stock(
         f"BETWEEN '{start_date}' AND '{end_date}' AND Symbol = '{ticker}' ORDER BY TimeStamp")
     return read_data(select_query)
 
-def read_sns(ticker:str, start_date:datetime, end_date:datetime) -> List[Tuple[Any, ...]]:
+def read_sns(ticker:str, start_date:datetime, end_date:datetime) -> Tuple[Tuple[Any, ...]]:
     """Gets the TextBlob sentiment for the given ticker, between the given dates."""
     #The database column name (vadersentiment_pos) is a misnomer (it actually represents the
     #mixed score of the TextBlob sentiment analyser).
@@ -100,6 +100,7 @@ def read_sns(ticker:str, start_date:datetime, end_date:datetime) -> List[Tuple[A
         FROM sns_comments
         WHERE `timestamp` BETWEEN '{start_date}' AND '{end_date}'
         AND symbol = '{ticker}'
+        AND vadersentiment_pos IS NOT NULL
         ORDER BY `timestamp`"""
     return read_data(select_query)
 
@@ -110,10 +111,43 @@ def read_test() -> None:
         WHERE Birthtime BETWEEN '1999-03-02 14:14:14' AND '2023-02-25 13:57:24'"""
     print(read_data(select_query))
 
+def get_list(select_query : str) -> List[Any]:
+    """Return the result of a 1-column SELECT statement, as a list"""
+    ticker_list = read_data(select_query)
+    return [ticker for (ticker,) in ticker_list] # list comprehension
+
+def comment_tickers() -> List[str]:
+    """Returns a list of tickers that appear in the comments"""
+    select_query = """
+        SELECT DISTINCT symbol
+        FROM sns_comments 
+        ORDER BY symbol"""
+    return get_list(select_query)
+
+def stock_tickers() -> List[str]:
+    """Returns a list of tickers that appear in the stock data"""
+    select_query = """
+        SELECT DISTINCT symbol
+        FROM stock_data 
+        ORDER BY symbol"""
+    return get_list(select_query)
+
+def social_media_sites() -> List[str]:
+    """Returns a list of social media sites"""
+    select_query = """
+        SELECT DISTINCT site
+        FROM sns_comments 
+        ORDER BY site"""
+    return get_list(select_query)
+
 if __name__ == '__main__':
     # upload_test()
     # read_test()
-    print(read_stock(
-        ticker = "GME",
-        start_date = datetime(2021, 1, 1),
-        end_date = datetime(2021, 1, 30)))
+    # print("Stock tickers: ", stock_tickers())
+    # print("Comment tickers: ", comment_tickers())
+    # print("Sites: ", social_media_sites())
+    # print(read_stock(
+    #     ticker = "GME",
+    #     start_date = datetime(2021, 1, 1),
+    #     end_date = datetime(2021, 1, 30)))
+    pass

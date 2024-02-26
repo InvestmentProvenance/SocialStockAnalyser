@@ -1,4 +1,5 @@
-# db_stock.py
+# Database/
+## db_stock.py
 DDL for the `Testing` table
 ```sql
     CREATE TABLE your_database_name.Testing(
@@ -9,15 +10,24 @@ DDL for the `Testing` table
     ) COMMENT = "Made for testing database operations."
 ```
 
-## Testing db_stock.upload_data()
+### upload_data()
 `db_stock.upload_test()`was ran, and we did see the data get uploaded.
 
-## Testing db_stock.read_data()
+### read_data()
 `db_stock.read_test()` was run. We did see the expected output.
 
-# data.py
+### comment_tickers()
+The expected output of `['AMC', 'GME', 'NIO']` was returned.
 
-## Testing data.get_sns_data()
+### stock_tickers()
+The expected output of `['GME']` was returned.
+
+### social_media_sites()
+The expected output of `['investors.hub', 'reddit.com']` was returned.
+
+## data.py
+
+### Testing data.get_sns_data()
 ```python 
   from datetime import datetime 
   from database.data import get_sns_data
