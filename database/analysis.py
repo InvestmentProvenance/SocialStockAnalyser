@@ -1,10 +1,10 @@
-"""Does statistical analysis"""
+"""Temporary file for producing timeseries and derived stats"""
 from typing import List, Tuple
 import datetime
 import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype
 import numpy as np
-import time_series_correlation
+# import time_series_correlation
 #Open charts in new windows
 
 import matplotlib.pyplot as plt

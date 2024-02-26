@@ -79,6 +79,7 @@ def log_normal(series : pd.Series) -> pd.Series:
     k.apply(lambda x : np.log(x+1))
     return k
 
+
 if __name__ =='__main__':
     # print(price_volume("GME", datetime.datetime(2021, 1, 1), datetime.datetime(2021, 1, 30), pd.Timedelta(10, "min")))
     print(df = get_sns_data( "GME", start_date = datetime(2021, 1, 1), end_date = datetime(2021, 1, 30)))
