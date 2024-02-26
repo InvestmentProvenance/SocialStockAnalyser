@@ -29,6 +29,22 @@ def stock_log_normal_parkinson_variance(ticker:str, start_time:datetime, end_tim
     # Calculate the average variance across all rows to represent the overall period's variance
     return df['parkinson_variance']
 
+def plotSeries(red : pd.Series, blue : pd.Series) -> None:
+    """Plots the given series. The series needs to have a datetime index"""
+    fig, ax = plt.subplots()
+
+    plt.ticklabel_format(style='plain')
+    plot = ax.plot(red, color='red', label=red.name)
+
+    ax.xlabel = 'Time'
+    ax.yaxis.set_major_formatter(ScalarFormatter(useMathText=True)) #TODO: Add a y-axis limit at 0?
+    ax.set(ylabel=red.name)
+
+    fig.autofmt_xdate(bottom=0.2, rotation=-30, ha='left')
+    plt.title(f"{red.name}")
+    plt.legend()
+    plt.show()
+
 def plotTwoSeries(red : pd.Series, blue : pd.Series) -> None:
     """Plots both the given series. Both series need to have an datetime index"""
     fig, red_ax = plt.subplots()

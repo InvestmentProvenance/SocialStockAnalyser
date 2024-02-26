@@ -85,7 +85,7 @@ def read_stock(
     end_date:datetime) -> Tuple[Tuple[Any, ...]]: #This type could be made more stringent.
     """Retrieves the stock data for the given ticker from the database, for the last 30 days,
         chronologically ordered"""
-    start_date = end_date - timedelta(days=30)  # 30 days per month approximation
+    # start_date = end_date - timedelta(days=30)  # 30 days per month approximation
     # Define the SQL query to select all data from the table
     select_query = (f"SELECT * FROM stock_data WHERE TimeStamp "
         f"BETWEEN '{start_date}' AND '{end_date}' AND Symbol = '{ticker}' ORDER BY TimeStamp")

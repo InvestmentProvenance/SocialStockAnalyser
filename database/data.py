@@ -51,11 +51,6 @@ def price_volume(ticker:str, start_time:datetime, end_time:datetime, intervals: 
     #TODO fix error due l=low granularity in timeframes when out of market hours, NaN error encountered
 #WARNING
 
-
-    return None
-
-
-    pass
 def naive_time_sentiment_aggregator(ticker:str, start_time:datetime, end_time:datetime, intervals:pd.Timedelta) -> pd.DataFrame :
     data = get_sns_data(ticker, start_time, end_time)
     #print(data)
