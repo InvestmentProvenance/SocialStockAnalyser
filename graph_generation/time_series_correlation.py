@@ -20,32 +20,6 @@ def __run_individual_correlation(compare_func,
     s2.index = s2.index + time_diff
     return compare_func(series1, s2)
 
-
-#analysis.py has a method to do this a bit cleaner, but this is more flexible
-def time_series_compare(compare_func,
-                         series1 : pd.Series,
-                        series2 : pd.Series,
-                        time_differences):
-    """Compares two time series using the given function and returns the result as a np array"""
-    #Maybe will work with other time types not tested yet
-    series1.sort_index(inplace=True)
-    series2.sort_index(inplace=True)
-    partial_individual_correlation = partial(
-        __run_individual_correlation,
-        compare_func,
-        series1,
-        series2)
-    with multiprocessing.Pool() as pool:
-        results = list(tqdm.tqdm(
-        pool.imap(partial_individual_correlation, time_differences, 
-                  chunksize=math.ceil(len(time_differences)/(multiprocessing.cpu_count()*8))),
-                total=len(time_differences),
-          desc="Calculating Correlation at Different Offsets"))
-        #results = list(tqdm.tqdm(map(partial_individual_correlation, time_differences)))
-    return pd.DataFrame(results)
-
-
-
 def pearson_correlation(stock_series: pd.Series, sns_series : pd.Series) -> float :
     """Calculates correlation between stock price and sentiment - Uses stock closing priceb
     Series must have timestamps in ascending order"""
@@ -81,6 +55,37 @@ def pearson_correlation(stock_series: pd.Series, sns_series : pd.Series) -> floa
     perason_correlation=  np.corrcoef(np.row_stack((stock_prices,cleaned_sentiments)))[0][1]
     lo, hi = data.confidence_interval(perason_correlation, len(stock_prices))
     return {'corr' : perason_correlation, 'lo' : lo, 'hi' :  hi}
+
+
+
+
+#analysis.py has a method to do this a bit cleaner, but this is more flexible
+def time_series_compare(
+                         series1 : pd.Series,
+                        series2 : pd.Series,
+                        time_differences,
+                        compare_func = pearson_correlation
+                        ):
+    """Compares two time series using the given function and returns the result as a np array,
+    Gives a dataframe with 'corr', 'lo' and 'hi' columns (at least if you use the pearson_correlation function)"""
+    #Maybe will work with other time types not tested yet
+    series1.sort_index(inplace=True)
+    series2.sort_index(inplace=True)
+    partial_individual_correlation = partial(
+        __run_individual_correlation,
+        compare_func,
+        series1,
+        series2)
+    with multiprocessing.Pool() as pool:
+        results = list(tqdm.tqdm(
+        pool.imap(partial_individual_correlation, time_differences, 
+                  chunksize=math.ceil(len(time_differences)/(multiprocessing.cpu_count()*8))),
+                total=len(time_differences),
+          desc="Calculating Correlation at Different Offsets"))
+        #results = list(tqdm.tqdm(map(partial_individual_correlation, time_differences)))
+    return pd.DataFrame(results)
+
+
 
 
 
