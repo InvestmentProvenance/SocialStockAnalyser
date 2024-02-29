@@ -1,6 +1,7 @@
 """A module for analysing correlation with respect to a difference between two time series."""
 import multiprocessing
 import sys
+import math
 from functools import partial
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -36,10 +37,12 @@ def time_series_compare(compare_func,
         series2)
     with multiprocessing.Pool() as pool:
         results = list(tqdm.tqdm(
-        pool.imap(partial_individual_correlation, time_differences, chunksize=16)
-        , total=len(time_differences), desc="Calculating Correlation at Different Offsets"))
+        pool.imap(partial_individual_correlation, time_differences, 
+                  chunksize=math.ceil(len(time_differences)/(multiprocessing.cpu_count()*8))),
+                total=len(time_differences),
+          desc="Calculating Correlation at Different Offsets"))
         #results = list(tqdm.tqdm(map(partial_individual_correlation, time_differences)))
-    return np.array(results)
+    return pd.DataFrame(results)
 
 
 
@@ -75,8 +78,9 @@ def pearson_correlation(stock_series: pd.Series, sns_series : pd.Series) -> floa
             count+=1
 
 
-    r=  np.corrcoef(np.row_stack((stock_prices,cleaned_sentiments)))[0][1]
-    return r
+    perason_correlation=  np.corrcoef(np.row_stack((stock_prices,cleaned_sentiments)))[0][1]
+    lo, hi = data.confidence_interval(perason_correlation, len(stock_prices))
+    return {'corr' : perason_correlation, 'lo' : lo, 'hi' :  hi}
 
 
 
@@ -90,7 +94,15 @@ if __name__ == "__main__":
     stock_data = data.get_data("GME", start_time = pd.to_datetime("2021-01-01"), end_time = pd.to_datetime("2021-01-30"))
     rolling_correlations = time_series_compare(pearson_correlation, stock_data, sns_data, time_diffs)
     print(rolling_correlations)
-    plt.plot(time_diffs_seconds, rolling_correlations)
+    plt.plot(time_diffs_seconds, rolling_correlations['corr'], label = 'Correlation')
+    yerr = [rolling_correlations['corr'] - rolling_correlations['lo'], 
+        rolling_correlations['hi'] - rolling_correlations['corr']]
+
+    # Plot with error bars
+    plt.errorbar(time_diffs_seconds, rolling_correlations['corr'], yerr=yerr, fmt='o', capsize=5, label='Confidence Interval')
+
+    plt.xlabel('Time Difference (seconds)')
+    plt.ylabel('Correlation')
     #plt.show()
     plt.savefig("correlation.png")
     
