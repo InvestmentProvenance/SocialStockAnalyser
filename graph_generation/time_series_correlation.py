@@ -1,10 +1,12 @@
 """A module for analysing correlation with respect to a difference between two time series."""
 import multiprocessing
+import sys
 from functools import partial
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import tqdm
+sys.path.insert(1, '/workspaces/SocialStockAnalyser') # Super hacky
 from database import data
 
 
@@ -17,6 +19,8 @@ def __run_individual_correlation(compare_func,
     s2.index = s2.index + time_diff
     return compare_func(series1, s2)
 
+
+#analysis.py has a method to do this a bit cleaner, but this is more flexible
 def time_series_compare(compare_func,
                          series1 : pd.Series,
                         series2 : pd.Series,
@@ -32,14 +36,14 @@ def time_series_compare(compare_func,
         series2)
     with multiprocessing.Pool() as pool:
         results = list(tqdm.tqdm(
-        pool.imap(partial_individual_correlation, time_differences)
+        pool.imap(partial_individual_correlation, time_differences, chunksize=16)
         , total=len(time_differences), desc="Calculating Correlation at Different Offsets"))
-    #results = list(map(partial_individual_correlation, time_differences))
-
+        #results = list(tqdm.tqdm(map(partial_individual_correlation, time_differences)))
     return np.array(results)
 
 
-def correlation(stock_series: pd.Series, sns_series : pd.Series) -> float :
+
+def pearson_correlation(stock_series: pd.Series, sns_series : pd.Series) -> float :
     """Calculates correlation between stock price and sentiment - Uses stock closing priceb
     Series must have timestamps in ascending order"""
 
@@ -67,26 +71,14 @@ def correlation(stock_series: pd.Series, sns_series : pd.Series) -> float :
     for idx, sentiment in enumerate(corresponding_sentiment):
         if  sentiment is not None:
             cleaned_sentiments[count] = corresponding_sentiment[idx]
-            stock_prices[count] = stock_series.iloc[idx]
+            stock_prices[count] = stock_series['open'].iloc[idx]
             count+=1
-    #TODO: use a different formula for correlation
-    return np.correlate(stock_prices, cleaned_sentiments)
 
 
-#For testing - delete later
-def get_market_sentiment():
-    """Returns a dataframe of the commment table. It has the timestamp, 
-    comment body and sentiment scores.
-    Records without a """
-    df = pd.read_csv("wallstreetbets-posts-and-comments-for-august-2021-comments 1.csv")
-    #get timestamps
-    df['datetime'] = pd.to_datetime(df.created_utc, unit='s').dt.tz_localize('UTC')
-    df = df[['datetime', 'body', 'sentiment']] #pick certain columns
-    df =  df[df.sentiment.notna()] #extract rows with existing sentiment scores
+    r=  np.corrcoef(np.row_stack((stock_prices,cleaned_sentiments)))[0][1]
+    return r
 
-    gme_mentions = df.body.str.contains("GME", case=False)
-    gamestop_mentions = df.body.str.contains("gamestop", case=False)
-    return df[gamestop_mentions | gme_mentions]
+
 
 
 #Example usage
@@ -94,19 +86,9 @@ if __name__ == "__main__":
     time_diffs_seconds = list(range(-4000, 4000, 20))
     time_diffs = [pd.Timedelta(seconds=i) for i in time_diffs_seconds]
 
-    sns_data = get_market_sentiment()
-    sns_data['timestamp'] = pd.to_datetime(sns_data['datetime']) # TZ aware
-    lower_ts = min(sns_data['timestamp'])
-    upper_ts = max(sns_data['timestamp'])
-    stock_data = data.get_data("GME", lower_ts, upper_ts)
-    # Not TZ aware, I guess I'm assuming UTC
-    stock_data['timestamp'] = pd.to_datetime(stock_data['timestamp'], utc = True)
-    stock_series = stock_data.set_index('timestamp').close
-    sns_series = sns_data.set_index('timestamp').sentiment
-
-    print("Rolling Correlations:")
-
-    rolling_correlations = time_series_compare(correlation, stock_series, sns_series, time_diffs)
+    sns_data = data.get_sns_data("GME", start_date = pd.to_datetime("2021-01-01"), end_date = pd.to_datetime("2021-01-30"))
+    stock_data = data.get_data("GME", start_time = pd.to_datetime("2021-01-01"), end_time = pd.to_datetime("2021-01-30"))
+    rolling_correlations = time_series_compare(pearson_correlation, stock_data, sns_data, time_diffs)
     print(rolling_correlations)
     plt.plot(time_diffs_seconds, rolling_correlations)
     #plt.show()
