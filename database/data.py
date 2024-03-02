@@ -153,7 +153,7 @@ def get_volume(df):
 def calculate_average_transaction_value(df):
     """
     Calculates the average transaction value for each row in the DataFrame.
-    The average transaction value is defined as the product of volume and the average price,
+    The average transaction value is defined as the product of volumse and the average price,
     where the average price is the mean of the open and close prices.
     """
     # Calculate the average price as the mean of open and close prices
