@@ -36,8 +36,7 @@ def get_sns_data(ticker:str, start_date:datetime, end_date:datetime) -> pd.DataF
         ticker within the given timerange. The dataframe contains only a sentiment column, and 
         is indexed and ordered by timestamp."""
     raw_data = db_stock.read_sns(ticker=ticker,start_date=start_date,end_date=end_date)
-    df = pd.DataFrame(raw_data,
-        columns=['timestamp', 'sentiment'])
+    df = pd.DataFrame(raw_data,columns=['timestamp', 'sentiment'])
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     df.set_index('timestamp', inplace=True)
     return df
