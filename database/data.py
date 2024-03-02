@@ -104,3 +104,63 @@ if __name__ =='__main__':
     # print(price_volume("GME", datetime.datetime(2021, 1, 1), datetime.datetime(2021, 1, 30), pd.Timedelta(10, "min")))
     df = get_sns_data( "GME", start_date = datetime(2021, 1, 1), end_date = datetime(2021, 1, 30))
     print(df)
+    
+    
+
+
+def calculate_abs_ln_percentage_return(df):
+    """
+    Adds a column to the DataFrame calculating the absolute natural logarithm 
+    percentage return of (close - open) / open for each row.
+    """
+    # Calculate the percentage return
+    df['ln_percentage_return'] = ((df['close'] - df['open']) / df['open'])
+    
+    # Calculate the absolute natural logarithm of the percentage return
+    df['abs_ln_percentage_return'] = abs(np.log(df['ln_percentage_return'] + 1))
+    
+    return df['abs_ln_percentage_return']
+
+def calculate_ln_percentage_return(df):
+    """
+    Adds a column to the DataFrame calculating the absolute natural logarithm 
+    percentage return of (close - open) / open for each row.
+    """
+    # Calculate the percentage return
+    df['percentage_return'] = ((df['close'] - df['open']) / df['open'])
+    
+    # Calculate the absolute natural logarithm of the percentage return
+    df['ln_percentage_return'] = np.log(df['percentage_return'] + 1)
+    
+    return df['ln_percentage_return']
+
+def calculate_abs_ln_ratio_high_low(df):
+    """
+    Adds a column to the DataFrame calculating the absolute natural logarithm 
+    of the ratio of high to low prices for each row.
+    """
+    # Calculate the ratio of high to low
+    df['high_low_ratio'] = df['high'] / df['low']
+    
+    # Calculate the absolute natural logarithm of the high to low ratio
+    df['abs_ln_high_low_ratio'] = abs(np.log(df['high_low_ratio']))
+    
+    return df
+
+def get_volume(df):
+    return df['volume']
+
+
+def calculate_average_transaction_value(df):
+    """
+    Calculates the average transaction value for each row in the DataFrame.
+    The average transaction value is defined as the product of volume and the average price,
+    where the average price is the mean of the open and close prices.
+    """
+    # Calculate the average price as the mean of open and close prices
+    df['average_price'] = (df['open'] + df['close']) / 2
+    
+    # Calculate the average transaction value as volume * average_price
+    df['average_transaction_value'] = df['volume'] * df['average_price']
+    
+    return df['average_transaction_value']
