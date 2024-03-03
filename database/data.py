@@ -163,3 +163,98 @@ def calculate_average_transaction_value(df):
     df['average_transaction_value'] = df['volume'] * df['average_price']
     
     return df['average_transaction_value']
+
+
+
+def get_sns_chat_volume(data: pd.DataFrame) -> pd.DataFrame:
+    """Return a DataFrame containing the chat volume of 5-minute intervals."""
+    # Resample the DataFrame to 5-minute intervals and count the number of occurrences in each interval
+    chat_volume = data.resample('5T').size()
+
+    # Convert the resulting Series to a DataFrame with a 'timestamp' index
+    chat_volume_df = chat_volume.to_frame(name='chat_volume')
+    
+    # Add a timestamp index
+    chat_volume_df.index.name = 'timestamp'
+
+    return chat_volume_df
+
+
+def get_average_sentiment_score(data: pd.DataFrame) -> pd.DataFrame:
+    """Return a DataFrame containing the average sentiment score of 5-minute intervals."""
+    # Resample the DataFrame to 5-minute intervals and calculate the mean sentiment score in each interval
+    average_score = data.resample('5T').agg({'sentiment': 'mean'})
+
+    # Rename the column to 'average_sentiment_score'
+    average_score.rename(columns={'sentiment': 'average_sentiment_score'}, inplace=True)
+    
+    return average_score
+
+# Example usage:
+# Assuming 'sns_data' is your DataFrame containing SNS data with a timestamp index
+# average_sentiment_score = get_average_sentiment_score(sns_data)
+# print(average_sentiment_score)
+
+
+
+
+def categorize_sentiment(sentiment_score: float) -> str:
+    """
+    Categorize sentiment based on the sentiment score.
+    Positive sentiment: score > 0.1
+    Negative sentiment: score < -0.1
+    Neutral sentiment: -0.1 <= score <= 0.1
+    """
+    if sentiment_score > 0.1:
+        return 'positive'
+    elif sentiment_score < -0.1:
+        return 'negative'
+    else:
+        return 'neutral'
+
+def get_sampled_sentiment(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Resample sentiment data to aggregate counts of positive and negative sentiments
+    over 5-minute intervals.
+    """
+    # Apply categorization of sentiment to the 'sentiment' column
+    df['sentiment_category'] = df['sentiment'].apply(categorize_sentiment)
+    
+    # Resample the DataFrame to 5-minute intervals and aggregate sentiment counts
+    sampled_df = df['sentiment_category'].resample('5T').value_counts().unstack(fill_value=0)
+    
+    # Rename columns for clarity
+    sampled_df.columns = ['positive_sentiment', 'neutral_sentiment', 'negative_sentiment']
+    
+    return sampled_df[['positive_sentiment', 'negative_sentiment']]
+
+
+# Example usage:
+# start_date = datetime(2024, 1, 1)
+# end_date = datetime(2024, 1, 2)
+# ticker = 'AAPL'
+
+# Get sentiment data
+# sns_data = get_sns_data(ticker, start_date, end_date)
+
+# # Resample sentiment data for 5-minute intervals
+# sampled_sentiment = get_sampled_sentiment(sns_data)
+# print(sampled_sentiment)
+
+
+
+
+
+def calculate_sentiment_difference(sampled_sentiment: pd.DataFrame) -> pd.DataFrame:
+    """
+    Calculate the difference between counts of positive and negative sentiment
+    for each 5-minute interval.
+    """
+    # Calculate the difference between counts of positive and negative sentiment
+    sampled_sentiment['sentiment_difference'] = sampled_sentiment['positive_sentiment'] - sampled_sentiment['negative_sentiment']
+    
+    return sampled_sentiment[['sentiment_difference']]
+
+# Example usage:
+# difference_df = calculate_sentiment_difference(sampled_sentiment)
+# print(difference_df)
