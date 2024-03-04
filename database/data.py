@@ -124,7 +124,7 @@ def calculate_abs_ln_percentage_return(df):
     percentage return of (close - open) / open for each row.
     """
     # Calculate the percentage return
-    df['ercentage_return'] = (df['close'] - df['open']) / df['open']
+    df['percentage_return'] = (df['close'] - df['open']) / df['open']
     # Calculate the absolute natural logarithm of the percentage return
     df['abs_ln_percentage_return'] = abs(np.log(df['percentage_return'] + 1))
     return df['abs_ln_percentage_return']
