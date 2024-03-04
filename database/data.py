@@ -2,11 +2,11 @@
 from datetime import datetime
 # import datetime
 import sys
+from statistics import NormalDist
+import math
 import numpy as np
 import pandas as pd
 import db_stock
-import math
-from statistics import NormalDist
 sys.path.insert(1, '/workspaces/SocialStockAnalyser') # Super hacky
 #from database import db_stock
 
@@ -91,7 +91,8 @@ def chat_volume(ticker:str, start_time:datetime, end_time:datetime,
     #print(data)
     #print(data.columns)
     #return data.groupby(pd.Grouper(key='datetime', freq=intervals)).sum()
-    return data.groupby(pd.Grouper(level='timestamp', freq=intervals)).count()['sentiment'].squeeze()
+    return data.groupby(pd.Grouper(level='timestamp', freq=intervals)
+                        ).count()['sentiment'].squeeze()
 
 #Testing Function
 #print(chat_volume("GME",datetime(2021, 1, 1), datetime(2021, 1, 30),pd.Timedelta(75, "min")))
@@ -100,7 +101,6 @@ def log_normal(series : pd.Series) -> pd.Series:
     k = series.pct_change(1)
     k.apply(lambda x : np.log(x+1))
     return k
-
 
 def confidence_interval(correlation:int, sample_number:int, conf_int:int = 0.95)->tuple:
     r_prime = 0.5*math.log((1+correlation)/(1-correlation))
@@ -113,12 +113,10 @@ def confidence_interval(correlation:int, sample_number:int, conf_int:int = 0.95)
     return (upper,lower)
 
 if __name__ =='__main__':
-    # print(price_volume("GME", datetime.datetime(2021, 1, 1), datetime.datetime(2021, 1, 30), pd.Timedelta(10, "min")))
-    df = get_sns_data( "GME", start_date = datetime(2021, 1, 1), end_date = datetime(2021, 1, 30))
-    print(df)
-    
-    
-
+    # print(price_volume("GME", datetime(2021,1,1), datetime(2021, 1, 30), pd.Timedelta(10, "min")))
+    test_df = get_sns_data( "GME", start_date = datetime(2021, 1, 1),
+                           end_date = datetime(2021, 1, 30))
+    print(test_df)
 
 def calculate_abs_ln_percentage_return(df):
     """
@@ -126,11 +124,9 @@ def calculate_abs_ln_percentage_return(df):
     percentage return of (close - open) / open for each row.
     """
     # Calculate the percentage return
-    df['ercentage_return'] = ((df['close'] - df['open']) / df['open'])
-    
+    df['ercentage_return'] = (df['close'] - df['open']) / df['open']
     # Calculate the absolute natural logarithm of the percentage return
     df['abs_ln_percentage_return'] = abs(np.log(df['percentage_return'] + 1))
-    
     return df['abs_ln_percentage_return']
 
 def calculate_ln_percentage_return(df):
@@ -139,11 +135,9 @@ def calculate_ln_percentage_return(df):
     percentage return of (close - open) / open for each row.
     """
     # Calculate the percentage return
-    df['percentage_return'] = ((df['close'] - df['open']) / df['open'])
-    
+    df['percentage_return'] = (df['close'] - df['open']) / df['open']
     # Calculate the absolute natural logarithm of the percentage return
     df['ln_percentage_return'] = np.log(df['percentage_return'] + 1)
-    
     return df['ln_percentage_return']
 
 def calculate_abs_ln_ratio_high_low(df):
@@ -153,15 +147,12 @@ def calculate_abs_ln_ratio_high_low(df):
     """
     # Calculate the ratio of high to low
     df['high_low_ratio'] = df['high'] / df['low']
-    
     # Calculate the absolute natural logarithm of the high to low ratio
     df['abs_ln_high_low_ratio'] = abs(np.log(df['high_low_ratio']))
-    
     return df
 
 def get_volume(df):
     return df['volume']
-
 
 def calculate_average_transaction_value(df):
     """
@@ -171,36 +162,27 @@ def calculate_average_transaction_value(df):
     """
     # Calculate the average price as the mean of open and close prices
     df['average_price'] = (df['open'] + df['close']) / 2
-    
     # Calculate the average transaction value as volume * average_price
     df['average_transaction_value'] = df['volume'] * df['average_price']
-    
     return df['average_transaction_value']
-
-
 
 def get_sns_chat_volume(data: pd.DataFrame) -> pd.DataFrame:
     """Return a DataFrame containing the chat volume of 5-minute intervals."""
-    # Resample the DataFrame to 5-minute intervals and count the number of occurrences in each interval
-    chat_volume = data.resample('5T').size()
-
+    # Resample the DataFrame to 5-minute intervals and count the number of
+    # occurrences in each interval
+    chat_volume_series = data.resample('5T').size()
     # Convert the resulting Series to a DataFrame with a 'timestamp' index
-    chat_volume_df = chat_volume.to_frame(name='chat_volume')
-    
+    chat_volume_df = chat_volume_series.to_frame(name='chat_volume')
     # Add a timestamp index
     chat_volume_df.index.name = 'timestamp'
-
     return chat_volume_df
-
 
 def get_average_sentiment_score(data: pd.DataFrame) -> pd.DataFrame:
     """Return a DataFrame containing the average sentiment score of 5-minute intervals."""
     # Resample the DataFrame to 5-minute intervals and calculate the mean sentiment score in each interval
     average_score = data.resample('5T').agg({'sentiment': 'mean'})
-
     # Rename the column to 'average_sentiment_score'
     average_score.rename(columns={'sentiment': 'average_sentiment_score'}, inplace=True)
-    
     return average_score
 
 # Example usage:
@@ -232,13 +214,10 @@ def get_sampled_sentiment(df: pd.DataFrame) -> pd.DataFrame:
     """
     # Apply categorization of sentiment to the 'sentiment' column
     df['sentiment_category'] = df['sentiment'].apply(categorize_sentiment)
-    
     # Resample the DataFrame to 5-minute intervals and aggregate sentiment counts
     sampled_df = df['sentiment_category'].resample('5T').value_counts().unstack(fill_value=0)
-    
     # Rename columns for clarity
     sampled_df.columns = ['positive_sentiment', 'neutral_sentiment', 'negative_sentiment']
-    
     return sampled_df[['positive_sentiment', 'negative_sentiment']]
 
 
@@ -265,7 +244,6 @@ def calculate_sentiment_difference(sampled_sentiment: pd.DataFrame) -> pd.DataFr
     """
     # Calculate the difference between counts of positive and negative sentiment
     sampled_sentiment['sentiment_difference'] = sampled_sentiment['positive_sentiment'] - sampled_sentiment['negative_sentiment']
-    
     return sampled_sentiment[['sentiment_difference']]
 
 # Example usage:
