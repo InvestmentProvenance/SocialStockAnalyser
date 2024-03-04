@@ -55,24 +55,37 @@ def get_sns_data_transformed(ticker:str, start_date:datetime, end_date:datetime)
 
 #Brij's Job:
 #Series should be indexed by datetimes
-def price_volume(ticker:str, start_time:datetime, end_time:datetime, intervals: pd.Timedelta = pd.Timedelta(5,"min")) -> pd.Series :
-    #generates the price * volume for a given time index with the mean of the open and close in the interval
-    data = get_data(ticker, start_time, end_time)#.sort_values(by=['timestamp']) #TODO: Stock data already comes out sorted by timestamp -ab2886
-    data = data.groupby(pd.Grouper(level='timestamp', freq=intervals)).agg({'open':'first', 'close':'last', 'low' : 'min','high' : 'max',  'volume' : 'sum', 'symbol' : 'first'})
+def price_volume(ticker:str, start_time:datetime, end_time:datetime,
+                 intervals: pd.Timedelta = pd.Timedelta(5,"min")) -> pd.Series :
+    """Generates the price * volume for a given time index with the mean of the open and
+    close in the interval"""
+    #TODO: Stock data already comes out sorted by timestamp -ab2886
+    data = get_data(ticker, start_time, end_time)#.sort_values(by=['timestamp'])
+    data = data.groupby(pd.Grouper(level='timestamp', freq=intervals)).agg(
+        {'open':'first','close':'last','low':'min','high':'max','volume':'sum','symbol':'first'})
     #print(data)
     return pd.Series((data.volume*(data.open + data.close)/2),index= data.index).interpolate()
-    #TODO fix error due l=low granularity in timeframes when out of market hours, NaN error encountered
+    #TODO: fix error due l=low granularity in timeframes when out of market hours,
+    #      NaN error encountered
+
 #WARNING
 
 #print(price_volume("GME", datetime(2021, 1, 1), datetime(2021, 1, 30), pd.Timedelta(10, "min")))
-def naive_time_sentiment_aggregator(ticker:str, start_time:datetime, end_time:datetime, intervals:pd.Timedelta) -> pd.DataFrame :
+def naive_time_sentiment_aggregator(ticker:str, start_time:datetime,
+                                    end_time:datetime, intervals:pd.Timedelta=pd.Timedelta(5,"min")
+                                    ) -> pd.DataFrame:
+    """Sums the chat sentiment within each interval (5mins by default), within the given time
+    range and ticker."""
     data = get_sns_data(ticker, start_time, end_time)
     #print(data)
     #print(data.columns)
     #return data.groupby(pd.Grouper(key='datetime', freq=intervals)).sum()
     return data.groupby(pd.Grouper(level='timestamp', freq=intervals)).sum()
 
-def chat_volume(ticker:str, start_time:datetime, end_time:datetime, intervals: pd.Timedelta = pd.Timedelta(5,"min")) -> pd.Series :
+def chat_volume(ticker:str, start_time:datetime, end_time:datetime,
+                intervals: pd.Timedelta = pd.Timedelta(5,"min")) -> pd.Series :
+    """Calculates chat velocity for the given ticker in the given time range. 
+    By default, each interval is 5 mins."""
     data = get_sns_data(ticker, start_time, end_time)
     #print(data)
     #print(data)
