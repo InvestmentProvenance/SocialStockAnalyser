@@ -23,4 +23,6 @@ ENV DB_PASSWORD "12345678"
 ENV DB_NAME "your_database_name"
 ENV TESTING = True
 # This wont run when you launch a dev conatiner but will run when sent to AWS - so is how we start our applicaiton
-CMD python3 main.py
+WORKDIR /workspaces
+RUN  echo ls
+CMD python3 -m SocialStockAnalyser.main
