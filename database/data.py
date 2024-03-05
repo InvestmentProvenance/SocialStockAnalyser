@@ -259,25 +259,58 @@ def calculate_sentiment_difference(sampled_sentiment: pd.DataFrame) -> pd.DataFr
 # difference_df = calculate_sentiment_difference(sampled_sentiment)
 # print(difference_df)
 
+def dataframe_to_series(df: pd.DataFrame, column: str) -> pd.Series:
+    """
+    Convert a column of a DataFrame to a Series.
+    """
+    # Check if the column exists in the DataFrame
+    if column not in df.columns:
+        raise ValueError(f"Column '{column}' does not exist in the DataFrame")
+
+    # Extract the specified column as a Series
+    series = df[column]
+    
+    return series
+def series_to_dataframe(series: pd.Series, column_name: str) -> pd.DataFrame:
+    """
+    Convert a Series to a DataFrame with a specified column name.
+    """
+    # Create a DataFrame with the Series and specified column name
+    df = pd.DataFrame({column_name: series})
+    
+    return df
+
+
 def calculate_correlation(series1: pd.Series, series2: pd.Series) -> float:
     """
     Calculate the correlation coefficient between two time series.
     """
     return series1.corr(series2)
 
-def calculate_autocorrelation(series: pd.Series, max_lag: int) -> list:
+
+
+
+def calculate_autocorrelation(df: pd.DataFrame, column1: str, column2: str, lag: int) -> float:
     """
-    Calculate the autocorrelation of a time series up to a maximum lag.
+    Calculate the autocorrelation between two columns of a DataFrame at a specified lag.
+    """
+    # Extract the specified columns as Series
+    series1 = df[column1]
+    series2 = df[column2]
+    
+    # Calculate the autocorrelation between the two series at the specified lag
+    autocorr = series1.autocorr(other=series2, lag=lag)
+    return autocorr
 
-    Parameters:
-    - series: A pandas Series representing the time series.
-    - max_lag: An integer specifying the maximum lag to calculate autocorrelation.
 
-    Returns:
-    - A list containing autocorrelation values up to the maximum lag.
+def calculate_autocorrelation_dataFram(df: pd.DataFrame, column1: str, column2: str, max_lag: int) -> pd.DataFrame:
+    """
+    Calculate the autocorrelation between two columns of a DataFrame up to a maximum lag.
     """
     autocorr_values = []
     for lag in range(max_lag + 1):
-        autocorr = series.autocorr(lag=lag)
+        autocorr = df[column1].autocorr(other=df[column2], lag=lag)
         autocorr_values.append(autocorr)
-    return autocorr_values
+    
+    result_df = pd.DataFrame({'Lag': range(max_lag + 1), 'Autocorrelation': autocorr_values})
+    return result_df
