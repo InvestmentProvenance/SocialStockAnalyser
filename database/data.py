@@ -258,3 +258,26 @@ def calculate_sentiment_difference(sampled_sentiment: pd.DataFrame) -> pd.DataFr
 # Example usage:
 # difference_df = calculate_sentiment_difference(sampled_sentiment)
 # print(difference_df)
+
+def calculate_correlation(series1: pd.Series, series2: pd.Series) -> float:
+    """
+    Calculate the correlation coefficient between two time series.
+    """
+    return series1.corr(series2)
+
+def calculate_autocorrelation(series: pd.Series, max_lag: int) -> list:
+    """
+    Calculate the autocorrelation of a time series up to a maximum lag.
+
+    Parameters:
+    - series: A pandas Series representing the time series.
+    - max_lag: An integer specifying the maximum lag to calculate autocorrelation.
+
+    Returns:
+    - A list containing autocorrelation values up to the maximum lag.
+    """
+    autocorr_values = []
+    for lag in range(max_lag + 1):
+        autocorr = series.autocorr(lag=lag)
+        autocorr_values.append(autocorr)
+    return autocorr_values
