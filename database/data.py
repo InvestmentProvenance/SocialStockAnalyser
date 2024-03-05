@@ -303,14 +303,21 @@ def calculate_autocorrelation(df: pd.DataFrame, column1: str, column2: str, lag:
     return autocorr
 
 
-def calculate_autocorrelation_dataFram(df: pd.DataFrame, column1: str, column2: str, max_lag: int) -> pd.DataFrame:
+def calculate_autocorrelation_dataframe(df1: pd.DataFrame, column1: str, df2=None, column2=None, max_lag: int = 0) -> pd.DataFrame:
     """
-    Calculate the autocorrelation between two columns of a DataFrame up to a maximum lag.
+    Calculate the autocorrelation between two columns of a DataFrame up to a maximum lag,
+    or between two columns of different DataFrames up to a maximum lag.
+    If df2 and column2 are provided, it calculates the autocorrelation between df1[column1] and df2[column2].
+    If df2 and column2 are not provided, it calculates the autocorrelation of df1[column1].
     """
     autocorr_values = []
     for lag in range(max_lag + 1):
-        autocorr = df[column1].autocorr(other=df[column2], lag=lag)
+        if df2 is None or column2 is None:
+            autocorr = df1[column1].autocorr(lag=lag)
+        else:
+            autocorr = df1[column1].autocorr(other=df2[column2].shift(-lag), lag=lag)
         autocorr_values.append(autocorr)
     
     result_df = pd.DataFrame({'Lag': range(max_lag + 1), 'Autocorrelation': autocorr_values})
     return result_df
+
