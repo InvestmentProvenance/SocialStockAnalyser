@@ -10,7 +10,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.ticker import ScalarFormatter #To avoid scientific notation
-import data
+
+from . import data
+
 COMMENTS_DATA = "wallstreetbets-posts-and-comments-for-august-2021-comments.csv"
 STOCK_DATA = ""
 
