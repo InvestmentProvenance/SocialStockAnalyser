@@ -6,7 +6,8 @@ from statistics import NormalDist
 import math
 import numpy as np
 import pandas as pd
-import db_stock
+sys.path.insert(1, '/workspaces/SocialStockAnalyser') 
+from database import db_stock
 sys.path.insert(1, '/workspaces/SocialStockAnalyser') # Super hacky
 #from database import db_stock
 
@@ -29,8 +30,7 @@ def upload_data(csv_data:pd.DataFrame):
     db_stock.upload_stock(raw_data=data_tuples)
 
 
-#Reuben's Job:
-#TODO: read from database instead of file
+
 def get_sns_data(ticker:str, start_date:datetime, end_date:datetime) -> pd.DataFrame:
     """Return a dataframe containing the TextBlob sentiment of comments that refer to a specific 
         ticker within the given timerange. The dataframe contains only a sentiment column, and 
@@ -249,3 +249,66 @@ def calculate_sentiment_difference(sampled_sentiment: pd.DataFrame) -> pd.DataFr
 # Example usage:
 # difference_df = calculate_sentiment_difference(sampled_sentiment)
 # print(difference_df)
+
+def dataframe_to_series(df: pd.DataFrame, column: str) -> pd.Series:
+    """
+    Convert a column of a DataFrame to a Series.
+    """
+    # Check if the column exists in the DataFrame
+    if column not in df.columns:
+        raise ValueError(f"Column '{column}' does not exist in the DataFrame")
+
+    # Extract the specified column as a Series
+    series = df[column]
+    
+    return series
+def series_to_dataframe(series: pd.Series, column_name: str) -> pd.DataFrame:
+    """
+    Convert a Series to a DataFrame with a specified column name.
+    """
+    # Create a DataFrame with the Series and specified column name
+    df = pd.DataFrame({column_name: series})
+    
+    return df
+
+
+def calculate_correlation(series1: pd.Series, series2: pd.Series) -> float:
+    """
+    Calculate the correlation coefficient between two time series.
+    """
+    return series1.corr(series2)
+
+
+
+
+def calculate_autocorrelation(df: pd.DataFrame, column1: str, column2: str, lag: int) -> float:
+    """
+    Calculate the autocorrelation between two columns of a DataFrame at a specified lag.
+    """
+    # Extract the specified columns as Series
+    series1 = df[column1]
+    series2 = df[column2]
+    
+    # Calculate the autocorrelation between the two series at the specified lag
+    autocorr = series1.autocorr(other=series2, lag=lag)
+    return autocorr
+
+
+def calculate_autocorrelation_dataframe(df1: pd.DataFrame, column1: str, df2=None, column2=None, max_lag: int = 0) -> pd.DataFrame:
+    """
+    Calculate the autocorrelation between two columns of a DataFrame up to a maximum lag,
+    or between two columns of different DataFrames up to a maximum lag.
+    If df2 and column2 are provided, it calculates the autocorrelation between df1[column1] and df2[column2].
+    If df2 and column2 are not provided, it calculates the autocorrelation of df1[column1].
+    """
+    autocorr_values = []
+    for lag in range(max_lag + 1):
+        if df2 is None or column2 is None:
+            autocorr = df1[column1].autocorr(lag=lag)
+        else:
+            autocorr = df1[column1].autocorr(other=df2[column2].shift(-lag), lag=lag)
+        autocorr_values.append(autocorr)
+    
+    result_df = pd.DataFrame({'Lag': range(max_lag + 1), 'Autocorrelation': autocorr_values})
+    return result_df
+
