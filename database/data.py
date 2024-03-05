@@ -5,18 +5,16 @@ import sys
 sys.path.insert(1, '/workspaces/SocialStockAnalyser') 
 import numpy as np
 import pandas as pd
-from database import db_stock
+#import db_stock
 import math
 from statistics import NormalDist
 sys.path.insert(1, '/workspaces/SocialStockAnalyser') # Super hacky
-#from database import db_stock
+from database import db_stock
 
 def get_data(ticker:str, start_time:datetime, end_time:datetime) -> pd.DataFrame :
     """Retrieves the stock data for the given ticker from the database
       and returns it as a pandas dataframe."""
     raw_data = db_stock.read_stock(ticker=ticker,start_date=start_time,end_date=end_time)
-    print("first: ", raw_data[0])
-    print("last: ", raw_data[-1])
     df = pd.DataFrame(raw_data,
         columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'symbol'])
     df['timestamp'] = pd.to_datetime(df['timestamp'])
@@ -113,7 +111,7 @@ def calculate_abs_ln_percentage_return(df):
     percentage return of (close - open) / open for each row.
     """
     # Calculate the percentage return
-    df['ercentage_return'] = ((df['close'] - df['open']) / df['open'])
+    df['percentage_return'] = ((df['close'] - df['open']) / df['open'])
     
     # Calculate the absolute natural logarithm of the percentage return
     df['abs_ln_percentage_return'] = abs(np.log(df['percentage_return'] + 1))
@@ -287,24 +285,37 @@ def calculate_correlation(series1: pd.Series, series2: pd.Series) -> float:
     """
     return series1.corr(series2)
 
-
-
-
-def calculate_autocorrelation(df: pd.DataFrame, column1: str, column2: str, lag: int) -> float:
+def calculate_correlation_series(series1: pd.Series, series2: pd.Series) -> pd.DataFrame:
     """
-    Calculate the autocorrelation between two columns of a DataFrame at a specified lag.
+    Calculate the correlation coefficient between two time series for various time shifts and return as a DataFrame.
     """
-    # Extract the specified columns as Series
-    series1 = df[column1]
-    series2 = df[column2]
-    
-    # Calculate the autocorrelation between the two series at the specified lag
-    autocorr = series1.autocorr(other=series2, lag=lag)
-    return autocorr
+    correlations = []
+    shifts = range(-60, 61)
+    for shift in shifts:
+        shifted_series2 = series2.shift(shift)
+        correlation = series1.corr(shifted_series2)
+        correlations.append(correlation)
+    df = pd.DataFrame({'Shift': shifts, 'Correlation': correlations})
+    return df
 
+def calculate_autocorrelation(series: pd.Series, max_lag: int) -> list:
+    """
+    Calculate the autocorrelation of a time series up to a maximum lag.
+    Parameters:
+    - series: A pandas Series representing the time series.
+    - max_lag: An integer specifying the maximum lag to calculate autocorrelation.
+    Returns:
+    - A list containing autocorrelation values up to the maximum lag.
+    """
+    autocorr_values = []
+    for lag in range(max_lag + 1):
+        autocorr = series.autocorr(lag=lag)
+        autocorr_values.append(autocorr)
+    return autocorr_values
 
 def calculate_autocorrelation_dataframe(df1: pd.DataFrame, column1: str, df2=None, column2=None, max_lag: int = 0) -> pd.DataFrame:
     """
+    Calculate the autocorrelation between two columns of a DataFrame up to a maximum lag.
     Calculate the autocorrelation between two columns of a DataFrame up to a maximum lag,
     or between two columns of different DataFrames up to a maximum lag.
     If df2 and column2 are provided, it calculates the autocorrelation between df1[column1] and df2[column2].
@@ -312,12 +323,15 @@ def calculate_autocorrelation_dataframe(df1: pd.DataFrame, column1: str, df2=Non
     """
     autocorr_values = []
     for lag in range(max_lag + 1):
+        autocorr = df1[column1].autocorr(other=df2[column2], lag=lag)
         if df2 is None or column2 is None:
             autocorr = df1[column1].autocorr(lag=lag)
         else:
             autocorr = df1[column1].autocorr(other=df2[column2].shift(-lag), lag=lag)
         autocorr_values.append(autocorr)
-    
+
+
     result_df = pd.DataFrame({'Lag': range(max_lag + 1), 'Autocorrelation': autocorr_values})
     return result_df
+
 

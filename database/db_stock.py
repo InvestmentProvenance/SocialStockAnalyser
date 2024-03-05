@@ -150,4 +150,5 @@ if __name__ == '__main__':
     #     ticker = "GME",
     #     start_date = datetime(2021, 1, 1),
     #     end_date = datetime(2021, 1, 30)))
+    print(stock_tickers())
     pass
