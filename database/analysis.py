@@ -81,13 +81,6 @@ def autocorrelate(series: pd.Series) -> pd.Series:
     df = pd.DataFrame(data, columns=['lag', f'{series.name} autocorrelation'])
     return pd.Series(df.set_index('lag').iloc[:, 0])
 
-
-def scatterGraph(stock_data : pd.DataFrame, sentiment_data : pd.DataFrame) -> pd.DataFrame:
-    """Returns a single dataframe, containing a stock and sentiment column, indexed by timestamp.
-    The inputted sentiment dataframe has to be in intervals of 5mins.
-    This will remove sentiment values when the market is closed."""
-    return pd.merge(stock_data, sentiment_data, left_index=True, right_index=True)
-
 if __name__ == '__main__':
     # print(stock_log_normal_parkinson_variance("GME", datetime(2021, 1, 1), datetime(2021, 1, 30)))
     print(autocorrelate(data.get_sns_data("GME", datetime(2021, 1, 1), datetime(2021, 1, 30)).sentiment))

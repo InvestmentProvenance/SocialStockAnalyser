@@ -213,7 +213,8 @@ app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.layout = html.Div([sidebar, content])
 
 
-def scatter_plot(df1, df2, )
+def scatter_plot(df1, df2, ):
+    pass
 
 @app.callback(
     Output('content', 'children'),

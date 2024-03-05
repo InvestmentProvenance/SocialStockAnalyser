@@ -328,4 +328,15 @@ def calculate_autocorrelation_dataframe(df1: pd.DataFrame, column1: str, df2=Non
     result_df = pd.DataFrame({'Lag': range(max_lag + 1), 'Autocorrelation': autocorr_values})
     return result_df
 
-
+def lag_join(series1 : pd.Series, series2 : pd.Series, series2_lag : int) -> pd.DataFrame:
+    """
+    Join two series together at an offset
+    Parameters:
+    - df1, df2: Two series, both indexed by timestamp. 
+                They both need to be in intervals of 5mins and have names.
+    - df2_lag:  The lag of df2 related to df1. A positive lag of 1 means that
+                df1[14] gets paired with df2[13].
+    Returns:
+    - A single dataframe, containing a df1 and df2 column, indexed by timestamp.
+    """
+    return pd.merge(series1, series2.shift(series2_lag), left_index=True, right_index=True)
