@@ -2,9 +2,10 @@
 from datetime import datetime
 # import datetime
 import sys
+sys.path.insert(1, '/workspaces/SocialStockAnalyser') 
 import numpy as np
 import pandas as pd
-import db_stock
+from database import db_stock
 import math
 from statistics import NormalDist
 sys.path.insert(1, '/workspaces/SocialStockAnalyser') # Super hacky
@@ -29,8 +30,7 @@ def upload_data(csv_data:pd.DataFrame):
     db_stock.upload_stock(raw_data=data_tuples)
 
 
-#Reuben's Job:
-#TODO: read from database instead of file
+
 def get_sns_data(ticker:str, start_date:datetime, end_date:datetime) -> pd.DataFrame:
     """Return a dataframe containing the TextBlob sentiment of comments that refer to a specific 
         ticker within the given timerange. The dataframe contains only a sentiment column, and 
