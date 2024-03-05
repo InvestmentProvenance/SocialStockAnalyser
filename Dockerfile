@@ -9,6 +9,7 @@ RUN pip install --upgrade pip
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
+
 #Uncomment to create the directory that stock_api_caller.py uses, on container build
 #RUN mkdir -p /home/vscode/Desktop/Stockdata
 
@@ -24,5 +25,5 @@ ENV DB_NAME "your_database_name"
 ENV TESTING = True
 # This wont run when you launch a dev conatiner but will run when sent to AWS - so is how we start our applicaiton
 WORKDIR /workspaces
-RUN  echo ls
+
 CMD python3 -m SocialStockAnalyser.main

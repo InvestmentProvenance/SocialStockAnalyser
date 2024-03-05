@@ -1,0 +1,19 @@
+FROM mcr.microsoft.com/devcontainers/python:3.11
+
+WORKDIR /workspaces/SocialStockAnalyser
+
+
+ENV DB_HOST "investdata.c5cwsai4kiot.us-east-1.rds.amazonaws.com"
+ENV DB_USER "admin"
+ENV DB_PASSWORD "12345678"
+ENV DB_NAME "your_database_name"
+
+RUN pip install --upgrade pip
+COPY ./requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+
+EXPOSE 8085
+# Change directory back to /workspaces for the final command
+CMD sh startup.sh
+#cd .. && ls && python3 -m SocialStockAnalyser.main

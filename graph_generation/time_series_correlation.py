@@ -53,6 +53,7 @@ def pearson_correlation(stock_series: pd.Series, sns_series : pd.Series) -> floa
 
 
     perason_correlation=  np.corrcoef(np.row_stack((stock_prices,cleaned_sentiments)))[0][1]
+    #TODO: The length should be getting shorters as there is less overlap between social and stock maybe?
     lo, hi = data.confidence_interval(perason_correlation, len(stock_prices))
     return {'corr' : perason_correlation, 'lo' : lo, 'hi' :  hi}
 
