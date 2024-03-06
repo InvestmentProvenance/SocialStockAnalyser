@@ -15,6 +15,9 @@ from datetime import timedelta
 from database import data
 import pandas as pd
 
+
+labels = {'abs_ln_percentage_return':'absolute % return', 'ln_percentage_return':'% return', 'volume':'volume', 'average_transaction_value':'average transaction value $','chat_volume':'chat volume','sentiment_difference':'absolute sentiment', 'average_sentiment_score':'average sentiment'}
+
 # the style arguments for the sidebar.
 SIDEBAR_STYLE = {
     'position': 'fixed',
@@ -38,6 +41,11 @@ TEXT_STYLE = {
     'color': '#191970'
 }
 
+LINK_STYLE = {
+    'textAlign': 'center',
+    'color': '#264ADA'
+}
+
 CARD_TEXT_STYLE = {
     'textAlign': 'center',
     'color': '#0074D9'
@@ -45,7 +53,7 @@ CARD_TEXT_STYLE = {
 
 controls = dbc.FormGroup(
     [
-        html.P('Ticker', style={
+        html.P('Ticker 1', style={
             'textAlign': 'center'
         }),
         dcc.Dropdown(
@@ -66,7 +74,7 @@ controls = dbc.FormGroup(
             multi=False
         ),
         html.Br(),
-        html.P('Ticker', style={
+        html.P('Ticker 2', style={
             'textAlign': 'center'
         }),
         dcc.Dropdown(
@@ -151,6 +159,14 @@ controls = dbc.FormGroup(
             color='primary',
             block=True
         ),
+        html.Br(),
+        dbc.Button(
+            id='clear_button',
+            n_clicks=0,
+            children='Clear graphs',
+            color='primary',
+            block=True
+        ),
     ]
 )
 
@@ -169,29 +185,14 @@ content_first_row = dbc.Row([
             [
                 dbc.CardBody(
                     [
-                        html.H4(id='card_title_1', children=['GME stock'], className='card-title',
+                        html.H4(id='card_title_1', children=['Feature calculations'], className='card-title',
                                 style=CARD_TEXT_STYLE),
-                        html.P(id='card_text_1', children=['Sample text.'], style=CARD_TEXT_STYLE),
+                        html.P(id='card_text_1', children=['All the information about calculating features can be found in ', html.A(href='https://github.com/InvestmentProvenance/SocialStockAnalyser/blob/main/database/Descriptions.md', children=["descriptions.md"], style=LINK_STYLE)], style=CARD_TEXT_STYLE),
                     ]
                 )
             ]
         ),
-        md=3
-    ),
-    dbc.Col(
-        dbc.Card(
-            [
-
-                dbc.CardBody(
-                    [
-                        html.H4('Calculations info', className='card-title', style=CARD_TEXT_STYLE),
-                        html.P('Price change - |log(price_N-1/price_N)| ...', style=CARD_TEXT_STYLE),
-                    ]
-                ),
-            ]
-
-        ),
-        md=3
+        md=5
     )
 ])
 
@@ -212,8 +213,34 @@ content = html.Div(
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.layout = html.Div([sidebar, content])
 
+"""
+@app.callback(
+    Output('content', 'children'),
+    [Input('clear_button', 'n_clicks')],
+    [State('content','children')
+        ])
+def clear_graphs(n_clicks, layout_content):
+    cont = [
+        html.H2('Analytics Dashboard', style=TEXT_STYLE),
+        html.Hr(),
+        content_first_row
+    ]
+    return cont
+"""
 
-def scatter_plot(df1, df2, )
+def scatter_plot(series1 : pd.Series, series2 : pd.Series, col1 : str, col2 : str, 
+                 series2_lag : int)-> go.Figure:
+    """Returns a pair of objects that can then be used to make a scatter plot.
+    You will need to call this function: 
+    `px.scatter(scatter_plot(), x=<series1>.name, y=<series2>.name, 
+                                                                    trendline="ols")`,
+    replacing <series1> with the first arg to scatter_plot, 
+         and <series2> with the second arg to scatter_plot.
+    """
+    series1.name = col1
+    series2.name = col2
+    pairs = data.lag_join(series1, series2, series2_lag)
+    return pairs
 
 @app.callback(
     Output('content', 'children'),
@@ -242,23 +269,27 @@ def add_graph(n_clicks,layout_content, ticker_option_1, ticker_option_2,stock_op
     if sns_options == "chat_volume":
         df2 = data.get_sns_chat_volume(ticker2_sns_data)
     elif sns_options == "sentiment_difference":
-        df2 = data.get_sampled_sentiment(ticker2_sns_data)
-        df2 = data.calculate_sentiment_difference(ticker2_sns_data)
+        extra = data.get_sampled_sentiment(ticker2_sns_data)
+        df2 = data.calculate_sentiment_difference(extra)
     elif sns_options == "average_sentiment_score":
         df2 = data.get_average_sentiment_score(ticker2_sns_data)
 
     df1 = pd.DataFrame(df1)
     corr_lag = data.calculate_correlation_series(df1[stock_options], df2[sns_options])
 
-    trace1 = go.Scatter(x=df1.index, y=df1[stock_options], name=stock_options)
-    trace2 = go.Line(x=df2.index,y=df2[sns_options], name=sns_options)
+    trace1 = go.Scattergl(x=df1.index, y=df1[stock_options],mode='markers', name=ticker_option_1+" "+labels[stock_options], opacity=0.3)
+    trace2 = go.Scattergl(x=df2.index,y=df2[sns_options], mode='markers', name=ticker_option_2+" "+ labels[sns_options], opacity=0.3)
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.add_trace(trace1)
     fig.add_trace(trace2,secondary_y=True)
+    fig.update_yaxes(title_text=f"{labels[stock_options]}", secondary_y=False)
+    fig.update_yaxes(title_text=f"{labels[sns_options]}", secondary_y=True)
+    fig.update_layout()
 
     print("head: ",corr_lag.head())
-    fig2 = px.line(corr_lag,x='Shift', y='Correlation',title='Lag correlation', labels={'Shift':'Lag in minutes', 'Correlation':'Pearson correlation value'})
-
+    fig2 = px.line(corr_lag,x='Shift', y='Correlation',title='Lag correlation',markers=True, labels={'Shift':'Lag in minutes', 'Correlation':'Pearson correlation value'})
+    fig3 = px.scatter(scatter_plot(df1,df2,stock_options,sns_options,0), x=df1.name, y=df2.name, trendline="ols", labels={stock_options:labels[stock_options], sns_options:labels[sns_options]}, title="Correlation at 0 lag")
+    
     layout_content.append(dbc.Row(
     [
         dbc.Col(
@@ -266,6 +297,9 @@ def add_graph(n_clicks,layout_content, ticker_option_1, ticker_option_2,stock_op
         ),
         dbc.Col(
             dcc.Graph(figure = fig2), md=12
+        ),
+        dbc.Col(
+            dcc.Graph(figure = fig3), md=12
         )
         ])
         )
@@ -291,26 +325,6 @@ def update_graph_1(n_clicks, dropdown_value, range_slider_value, check_list_valu
 
     return fig
 """
-
-
-@app.callback(
-    Output('card_title_1', 'children'),
-    [Input('submit_button', 'n_clicks')],
-    [State('ticker_1', 'value'), State('range_slider', 'value'), State('stock_options', 'value'),
-     State('sns_options', 'value')
-     ])
-def update_card_title_1(n_clicks, dropdown_value, range_slider_value, check_list_value, radio_items_value):
-    return dropdown_value[0]
-
-
-@app.callback(
-    Output('card_text_1', 'children'),
-    [Input('submit_button', 'n_clicks')],
-    [State('ticker_1', 'value'), State('range_slider', 'value'), State('stock_options', 'value'),
-     State('sns_options', 'value')
-     ])
-def update_card_text_1(n_clicks, dropdown_value, range_slider_value, check_list_value, radio_items_value):
-    return 'info about ' + dropdown_value[0]
 
 
 if __name__ == '__main__':

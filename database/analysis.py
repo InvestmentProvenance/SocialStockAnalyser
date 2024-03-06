@@ -1,5 +1,5 @@
 """Temporary file for producing timeseries and derived stats"""
-from typing import List, Tuple
+#from typing import List, Tuple
 from datetime import datetime
 import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype
@@ -10,7 +10,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.ticker import ScalarFormatter #To avoid scientific notation
-import data
+
+from . import data
+
 COMMENTS_DATA = "wallstreetbets-posts-and-comments-for-august-2021-comments.csv"
 STOCK_DATA = ""
 
@@ -72,10 +74,12 @@ def plotTwoSeries(red : pd.Series, blue : pd.Series) -> None:
     plt.show()
 
 def autocorrelate(series: pd.Series) -> pd.Series:
+    """Given a pd.Series, calculate autocorrelations upto 100, by shifting the array along by 1.
+    Ignores time.
+    Returned is a pd.Series, indexed by lag (integer), of the correlation coefficients."""
     data = [(i, series.autocorr(i)) for i in range(100)]
     df = pd.DataFrame(data, columns=['lag', f'{series.name} autocorrelation'])
     return pd.Series(df.set_index('lag').iloc[:, 0])
-
 
 if __name__ == '__main__':
     # print(stock_log_normal_parkinson_variance("GME", datetime(2021, 1, 1), datetime(2021, 1, 30)))
