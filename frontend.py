@@ -15,6 +15,9 @@ from datetime import timedelta
 from database import data
 import pandas as pd
 
+
+labels = {'abs_ln_percentage_return':'absolute % return', 'ln_percentage_return':'% return', 'volume':'volume', 'average_transaction_value':'average transaction value $','chat_volume':'chat volume','sentiment_difference':'absolute sentiment', 'average_sentiment_score':'average sentiment'}
+
 # the style arguments for the sidebar.
 SIDEBAR_STYLE = {
     'position': 'fixed',
@@ -45,7 +48,7 @@ CARD_TEXT_STYLE = {
 
 controls = dbc.FormGroup(
     [
-        html.P('Ticker', style={
+        html.P('Ticker 1', style={
             'textAlign': 'center'
         }),
         dcc.Dropdown(
@@ -66,7 +69,7 @@ controls = dbc.FormGroup(
             multi=False
         ),
         html.Br(),
-        html.P('Ticker', style={
+        html.P('Ticker 2', style={
             'textAlign': 'center'
         }),
         dcc.Dropdown(
@@ -151,6 +154,14 @@ controls = dbc.FormGroup(
             color='primary',
             block=True
         ),
+        html.Br(),
+        dbc.Button(
+            id='clear_button',
+            n_clicks=0,
+            children='Clear graphs',
+            color='primary',
+            block=True
+        ),
     ]
 )
 
@@ -212,8 +223,20 @@ content = html.Div(
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.layout = html.Div([sidebar, content])
 
-
-def scatter_plot(df1, df2, )
+"""
+@app.callback(
+    Output('content', 'children'),
+    [Input('clear_button', 'n_clicks')],
+    [State('content','children')
+        ])
+def clear_graphs(n_clicks, layout_content):
+    cont = [
+        html.H2('Analytics Dashboard', style=TEXT_STYLE),
+        html.Hr(),
+        content_first_row
+    ]
+    return cont
+"""
 
 @app.callback(
     Output('content', 'children'),
@@ -250,14 +273,17 @@ def add_graph(n_clicks,layout_content, ticker_option_1, ticker_option_2,stock_op
     df1 = pd.DataFrame(df1)
     corr_lag = data.calculate_correlation_series(df1[stock_options], df2[sns_options])
 
-    trace1 = go.Scatter(x=df1.index, y=df1[stock_options], name=stock_options)
-    trace2 = go.Line(x=df2.index,y=df2[sns_options], name=sns_options)
+    trace1 = go.Scattergl(x=df1.index, y=df1[stock_options],mode='markers', name=ticker_option_1+" "+labels[stock_options], opacity=0.3)
+    trace2 = go.Scattergl(x=df2.index,y=df2[sns_options], mode='markers', name=ticker_option_2+" "+ labels[sns_options], opacity=0.3)
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.add_trace(trace1)
     fig.add_trace(trace2,secondary_y=True)
+    fig.update_yaxes(title_text=f"{labels[stock_options]}", secondary_y=False)
+    fig.update_yaxes(title_text=f"{labels[sns_options]}", secondary_y=True)
+    fig.update_layout()
 
     print("head: ",corr_lag.head())
-    fig2 = px.line(corr_lag,x='Shift', y='Correlation',title='Lag correlation', labels={'Shift':'Lag in minutes', 'Correlation':'Pearson correlation value'})
+    fig2 = px.line(corr_lag,x='Shift', y='Correlation',title='Lag correlation',markers=True, labels={'Shift':'Lag in minutes', 'Correlation':'Pearson correlation value'})
 
     layout_content.append(dbc.Row(
     [
