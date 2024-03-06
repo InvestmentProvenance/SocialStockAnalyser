@@ -41,6 +41,11 @@ TEXT_STYLE = {
     'color': '#191970'
 }
 
+LINK_STYLE = {
+    'textAlign': 'center',
+    'color': '#264ADA'
+}
+
 CARD_TEXT_STYLE = {
     'textAlign': 'center',
     'color': '#0074D9'
@@ -180,29 +185,14 @@ content_first_row = dbc.Row([
             [
                 dbc.CardBody(
                     [
-                        html.H4(id='card_title_1', children=['GME stock'], className='card-title',
+                        html.H4(id='card_title_1', children=['Feature calculations'], className='card-title',
                                 style=CARD_TEXT_STYLE),
-                        html.P(id='card_text_1', children=['Sample text.'], style=CARD_TEXT_STYLE),
+                        html.P(id='card_text_1', children=['All the information about calculating features can be found in ', html.A(href='https://github.com/InvestmentProvenance/SocialStockAnalyser/blob/main/database/Descriptions.md', children=["descriptions.md"], style=LINK_STYLE)], style=CARD_TEXT_STYLE),
                     ]
                 )
             ]
         ),
-        md=3
-    ),
-    dbc.Col(
-        dbc.Card(
-            [
-
-                dbc.CardBody(
-                    [
-                        html.H4('Calculations info', className='card-title', style=CARD_TEXT_STYLE),
-                        html.P('Price change - |log(price_N-1/price_N)| ...', style=CARD_TEXT_STYLE),
-                    ]
-                ),
-            ]
-
-        ),
-        md=3
+        md=5
     )
 ])
 
@@ -247,8 +237,8 @@ def scatter_plot(series1 : pd.Series, series2 : pd.Series, col1 : str, col2 : st
     replacing <series1> with the first arg to scatter_plot, 
          and <series2> with the second arg to scatter_plot.
     """
-    series1.name = col1.name
-    series2.name = col2.name
+    series1.name = col1
+    series2.name = col2
     pairs = data.lag_join(series1, series2, series2_lag)
     return pairs
 
@@ -279,8 +269,8 @@ def add_graph(n_clicks,layout_content, ticker_option_1, ticker_option_2,stock_op
     if sns_options == "chat_volume":
         df2 = data.get_sns_chat_volume(ticker2_sns_data)
     elif sns_options == "sentiment_difference":
-        df2 = data.get_sampled_sentiment(ticker2_sns_data)
-        df2 = data.calculate_sentiment_difference(ticker2_sns_data)
+        extra = data.get_sampled_sentiment(ticker2_sns_data)
+        df2 = data.calculate_sentiment_difference(extra)
     elif sns_options == "average_sentiment_score":
         df2 = data.get_average_sentiment_score(ticker2_sns_data)
 
@@ -298,7 +288,8 @@ def add_graph(n_clicks,layout_content, ticker_option_1, ticker_option_2,stock_op
 
     print("head: ",corr_lag.head())
     fig2 = px.line(corr_lag,x='Shift', y='Correlation',title='Lag correlation',markers=True, labels={'Shift':'Lag in minutes', 'Correlation':'Pearson correlation value'})
-
+    fig3 = px.scatter(scatter_plot(df1,df2,stock_options,sns_options,0), x=df1.name, y=df2.name, trendline="ols", labels={stock_options:labels[stock_options], sns_options:labels[sns_options]}, title="Correlation at 0 lag")
+    
     layout_content.append(dbc.Row(
     [
         dbc.Col(
@@ -306,6 +297,9 @@ def add_graph(n_clicks,layout_content, ticker_option_1, ticker_option_2,stock_op
         ),
         dbc.Col(
             dcc.Graph(figure = fig2), md=12
+        ),
+        dbc.Col(
+            dcc.Graph(figure = fig3), md=12
         )
         ])
         )
@@ -331,26 +325,6 @@ def update_graph_1(n_clicks, dropdown_value, range_slider_value, check_list_valu
 
     return fig
 """
-
-
-@app.callback(
-    Output('card_title_1', 'children'),
-    [Input('submit_button', 'n_clicks')],
-    [State('ticker_1', 'value'), State('range_slider', 'value'), State('stock_options', 'value'),
-     State('sns_options', 'value')
-     ])
-def update_card_title_1(n_clicks, dropdown_value, range_slider_value, check_list_value, radio_items_value):
-    return dropdown_value[0]
-
-
-@app.callback(
-    Output('card_text_1', 'children'),
-    [Input('submit_button', 'n_clicks')],
-    [State('ticker_1', 'value'), State('range_slider', 'value'), State('stock_options', 'value'),
-     State('sns_options', 'value')
-     ])
-def update_card_text_1(n_clicks, dropdown_value, range_slider_value, check_list_value, radio_items_value):
-    return 'info about ' + dropdown_value[0]
 
 
 if __name__ == '__main__':
