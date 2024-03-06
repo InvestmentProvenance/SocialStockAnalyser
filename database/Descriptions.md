@@ -27,8 +27,9 @@ The range of values which the estimated correlation coefficient could lie within
 ## Aggregate sentiment
 The sum of sentiment scores for all social media comments in relation to a ticker in a time frame
 
-## Rate of Returnv
-the percentage change between the open prices of a security when shifted by one time frame
+## Rate of Return
+the natural log percentage change between the open prices of a security when shifted by one time frame
+
 
 ## Volume x Velocity
 
