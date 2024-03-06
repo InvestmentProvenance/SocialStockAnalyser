@@ -213,8 +213,19 @@ app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.layout = html.Div([sidebar, content])
 
 
-def scatter_plot(df1, df2, ):
-    pass
+def scatter_plot(series1 : pd.Series, series2 : pd.Series, col1 : str, col2 : str, 
+                 series2_lag : int)-> go.Figure:
+    """Returns a pair of objects that can then be used to make a scatter plot.
+    You will need to call this function: 
+    `px.scatter(scatter_plot(), x=<series1>.name, y=<series2>.name, 
+                                                                    trendline="ols")`,
+    replacing <series1> with the first arg to scatter_plot, 
+         and <series2> with the second arg to scatter_plot.
+    """
+    series1.name = col1.name
+    series2.name = col2.name
+    pairs = data.lag_join(series1, series2, series2_lag)
+    return pairs
 
 @app.callback(
     Output('content', 'children'),
