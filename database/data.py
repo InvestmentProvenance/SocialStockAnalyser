@@ -295,7 +295,8 @@ def calculate_correlation_series(series1: pd.Series, series2: pd.Series) -> pd.D
         shifted_series2 = series2.shift(shift)
         correlation = series1.corr(shifted_series2)
         correlations.append(correlation)
-    df = pd.DataFrame({'Shift': shifts, 'Correlation': correlations})
+    new_shifts = [x*5 for x in shifts] 
+    df = pd.DataFrame({'Shift': new_shifts, 'Correlation': correlations})
     return df
 
 def calculate_autocorrelation(series: pd.Series, max_lag: int) -> list:
