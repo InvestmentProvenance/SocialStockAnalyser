@@ -2,7 +2,6 @@
 from datetime import datetime
 from ..database import db_stock
 from ..database import data
-from ..database import analysis
 
 #test file must start with 'test_'
 
@@ -20,8 +19,8 @@ def test_scatter_graph():
     end = datetime(2021,1,30)
     sentiment = data.chat_volume(ticker, start, end)
     stock = data.price_volume(ticker, start, end)
-    scatter = analysis.scatterGraph(stock, sentiment)
-    print("Lol")
+    scatter = data.lag_join(stock, sentiment, 5)
+    print("blah")
 
 if __name__ == "__main__":
     test_scatter_graph()
