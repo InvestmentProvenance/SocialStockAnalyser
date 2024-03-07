@@ -29,7 +29,7 @@ The range of values which the estimated correlation coefficient could lie within
 2. Calculate the standard deviation of the transformed correlation.
     S'=	1/√(n-3)
 3. Calculate the confidence interval using the Z statistic.
-    Upper' = r' + Z(1-α/2) * S'
+    Upper' = $$r' + Z(1-\alpha/2) * S'$$
     Lower' = r' - Z(1-α/2) * S'
 4. Transform back the lower and upper values to the correlation scale.
     Lower =	tanh(Lower')
