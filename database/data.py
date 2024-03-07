@@ -216,9 +216,10 @@ def get_sampled_sentiment(df: pd.DataFrame) -> pd.DataFrame:
     # Apply categorization of sentiment to the 'sentiment' column
     df['sentiment_category'] = df['sentiment'].apply(categorize_sentiment)
     # Resample the DataFrame to 5-minute intervals and aggregate sentiment counts
-    sampled_df = df['sentiment_category'].resample('5T').value_counts().unstack(fill_value=0)
+    sampled_df = df.groupby([pd.Grouper(freq='5min'), 'sentiment_category']).sum().unstack(fill_value=0)
+    #sampled_df = df['sentiment_category'].resample('5T').value_counts().unstack(fill_value=0)
     # Rename columns for clarity
-    sampled_df.columns = ['positive_sentiment', 'neutral_sentiment', 'negative_sentiment']
+    sampled_df.columns = ['negative_sentiment', 'neutral_sentiment', 'positive_sentiment']
     return sampled_df[['positive_sentiment', 'negative_sentiment']]
 
 
@@ -244,7 +245,7 @@ def calculate_sentiment_difference(sampled_sentiment: pd.DataFrame) -> pd.DataFr
     for each 5-minute interval.
     """
     # Calculate the difference between counts of positive and negative sentiment
-    sampled_sentiment['sentiment_difference'] = sampled_sentiment['positive_sentiment'] - sampled_sentiment['negative_sentiment']
+    sampled_sentiment['sentiment_difference'] = sampled_sentiment['positive_sentiment'] + sampled_sentiment['negative_sentiment']
     return sampled_sentiment[['sentiment_difference']]
 
 # Example usage:
