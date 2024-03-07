@@ -286,7 +286,7 @@ def add_graph(n_clicks,layout_content, ticker_option_1, ticker_option_2,stock_op
 
     df1 = pd.DataFrame(df1)
     corr_lag = data.calculate_correlation_series(df1[stock_options], df2[sns_options])
-
+    #Create dual bar chart
     trace1 = go.Scattergl(x=df1.index, y=df1[stock_options],mode='markers', name=ticker_option_1+" "+labels[stock_options], opacity=0.3)
     trace2 = go.Scattergl(x=df2.index,y=df2[sns_options], mode='markers', name=ticker_option_2+" "+ labels[sns_options], opacity=0.3)
     fig = make_subplots(specs=[[{"secondary_y": True}]])
@@ -295,8 +295,9 @@ def add_graph(n_clicks,layout_content, ticker_option_1, ticker_option_2,stock_op
     fig.update_yaxes(title_text=f"{labels[stock_options]}", secondary_y=False)
     fig.update_yaxes(title_text=f"{labels[sns_options]}", secondary_y=True)
     fig.update_layout()
-
+    #Create Lag correlation graph
     print("head: ",corr_lag.head())
+    px.scatter(corr_lag, x='Shift', y='Correlation', title='Lag correlation', ).show()
     fig2 = px.line(corr_lag,x='Shift', y='Correlation',title='Lag correlation',markers=True, labels={'Shift':'Lag in minutes', 'Correlation':'Pearson correlation value'})
 
     layout_content.append(dbc.Row(
