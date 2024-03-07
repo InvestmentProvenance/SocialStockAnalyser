@@ -293,9 +293,18 @@ def add_graph(n_clicks,layout_content, ticker_option_1, ticker_option_2,stock_op
         spikes.append( #Constructor information for each spike
             {'type':'line', 'xref':'x', 'yref':'y', 'x0':time, 'y0':0,
             'x1':time, 'y1':corr, 'line':{'color':'#636EFA', 'width':1}}
-        )
+        )   
 
+        #Add error bars to corr_lag
+    get_confidence_interval = lambda corr : data.confidence_interval(corr, min(len(df1), len(df2)))
+    intervals_obj = corr_lag.Correlation.apply(get_confidence_interval)
+    abs_intervals = pd.DataFrame(list(intervals_obj), columns=['abs_lower', 'abs_upper'])
+    rel_intervals = pd.concat([corr_lag.Correlation - abs_intervals.abs_lower,
+                               abs_intervals.abs_upper - corr_lag.Correlation],
+                               keys=['rel_lower', 'rel_upper'], axis=1)
+    corr_lag = pd.concat([corr_lag, rel_intervals], axis=1)
     fig2 = px.scatter(corr_lag,x='Shift', y='Correlation',title='Lag correlation',
+                      error_y="rel_upper", error_y_minus="rel_lower",
                       labels={'Shift':'Lag in minutes', 'Correlation':'Pearson correlation value'})
     fig2.update_layout(shapes=spikes) #Add spikes to scatter plot
     #Create phase space scatter graph with line of best fit
