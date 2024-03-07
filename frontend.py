@@ -187,7 +187,7 @@ content_first_row = dbc.Row([
                     [
                         html.H4(id='card_title_1', children=['Feature calculations'], className='card-title',
                                 style=CARD_TEXT_STYLE),
-                        html.P(id='card_text_1', children=['All the information about calculating features can be found in ', html.A(href='https://github.com/InvestmentProvenance/SocialStockAnalyser/blob/main/database/Descriptions.md', children=["descriptions.md"], style=LINK_STYLE)], style=CARD_TEXT_STYLE),
+                        html.P(id='card_text_1', children=['All the information about calculating features can be found in ', html.A(href='https://github.com/InvestmentProvenance/SocialStockAnalyser/blob/main/Descriptions.md', children=["descriptions.md"], style=LINK_STYLE)], style=CARD_TEXT_STYLE),
                     ]
                 )
             ]
