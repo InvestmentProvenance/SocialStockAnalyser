@@ -48,7 +48,7 @@ LINK_STYLE = {
 
 CARD_TEXT_STYLE = {
     'textAlign': 'center',
-    'color': '#0074D9'
+    'color': 'a'
 }
 
 controls = dbc.FormGroup(
@@ -287,7 +287,18 @@ def add_graph(n_clicks,layout_content, ticker_option_1, ticker_option_2,stock_op
     fig.update_layout()
     #Create Lag correlation graph
     print("head: ",corr_lag.head())
-    fig2 = px.line(corr_lag,x='Shift', y='Correlation',title='Lag correlation',markers=True, labels={'Shift':'Lag in minutes', 'Correlation':'Pearson correlation value'})
+
+    spikes = []
+    for time, corr in zip(corr_lag.Shift, corr_lag.Correlation):
+        spikes.append( #Constructor information for each spike
+            {'type':'line', 'xref':'x', 'yref':'y', 'x0':time, 'y0':0,
+            'x1':time, 'y1':corr, 'line':{'color':'#636EFA', 'width':1}}
+        )
+
+    fig2 = px.scatter(corr_lag,x='Shift', y='Correlation',title='Lag correlation',
+                      labels={'Shift':'Lag in minutes', 'Correlation':'Pearson correlation value'})
+    fig2.update_layout(shapes=spikes) #Add spikes to scatter plot
+    #Create phase space scatter graph with line of best fit
     fig3 = px.scatter(scatter_plot(df1,df2,stock_options,sns_options,0), x=df1.name, y=df2.name, trendline="ols", labels={stock_options:labels[stock_options], sns_options:labels[sns_options]}, title="Correlation at 0 lag")
     
     layout_content.append(dbc.Row(
