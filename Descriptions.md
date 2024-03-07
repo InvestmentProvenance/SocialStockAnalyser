@@ -68,5 +68,5 @@ the natural log of the percentage change between the open prices of a security w
 
 In this case Velocity describes the number of social media comments pertaining to a certain ticker within a given time Frame
 Volume describes the number of trades executed on a security within the same time frame.
-Volume x Velocity is the simple product of these integers presented as a time series with the selected time frame as increments. $$\text{volume(of timeframe)} \times \text{ chat/_velocity(of timeframe)}$$
+Volume x Velocity is the simple product of these integers presented as a time series with the selected time frame as increments. $$\text{volume(of timeframe)} \times \text{ chat\_velocity(of timeframe)}$$
 
