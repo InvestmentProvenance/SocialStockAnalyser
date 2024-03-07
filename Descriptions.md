@@ -25,7 +25,7 @@ A short character code representing a security on an exchange
 The range of values which the estimated correlation coefficient could lie within, with a default 95% chance. The calculation assumes a normal distribution around a mean correlation value to calculate the upper and lower bounds of the confidence interval.
 
 1. Transform the correlation with the Fisher's transformation.
-    r' = arctanh(r)
+    $$r' = \text{arctanh(r)}$$
 2. Calculate the standard deviation of the transformed correlation.
     $$S' = \frac{1}{\sqrt{n-3}}$$
 3. Calculate the confidence interval using the Z statistic.
@@ -36,27 +36,37 @@ The range of values which the estimated correlation coefficient could lie within
     $$\text{Upper} =\text{tanh(Upper')}$$
 # Where:
 r - sample Pearson correlation coefficient.
+
 r'- transformed correlation (Fisher, 1921).
+
 S' - the approximate standard deviation of the transformed correlation.
+
 n - the sample size (the number of observations).
+
 C -confidence level.
+
 Z - Standard Normal Distribution
+
 α = 1 - C.
+
 Lower' - lower limit of the transformed correlation (r').
+
 Upper' - Upper limit of the transformed correlation (r').
+
 Lower - lower limit of the correlation (r).
+
 Upper - Upper limit of the correlation (r).
 
 ## Aggregate sentiment
 The sum of sentiment scores for all social media comments in relation to a ticker in a time frame sum(sentiment score for each comment in time frame)
 
 ## Rate of Return
-the natural log of the percentage change between the open prices of a security when shifted by one time frame ln(price(n+1)/price(n))
+the natural log of the percentage change between the open prices of a security when shifted by one time frame $$ln(\text{price}(n+1)/\text{price}(n))$$
 
 
 ## Volume x Velocity
 
 In this case Velocity describes the number of social media comments pertaining to a certain ticker within a given time Frame
 Volume describes the number of trades executed on a security within the same time frame.
-Volume x Velocity is the simple product of these integers presented as a time series with the selected time frame as increments. volumn(of timeframe) * chat_velocity(of timeframe)
+Volume x Velocity is the simple product of these integers presented as a time series with the selected time frame as increments. $$\text{volume(of timeframe)} \times \text{ chat_velocity(of timeframe)}$$
 
