@@ -27,7 +27,7 @@ The range of values which the estimated correlation coefficient could lie within
 1. Transform the correlation with the Fisher's transformation.
     r' = arctanh(r)
 2. Calculate the standard deviation of the transformed correlation.
-    $$S' = \frac{1}{\sqrt{n-3}}
+    $$S' = \frac{1}{\sqrt{n-3}}$$
 3. Calculate the confidence interval using the Z statistic.
     $$\text{Upper'} = r' + Z(1-\alpha/2) * S'$$
     $$\text{Lower'} = r' - Z(1-\alpha/2) * S'$$
